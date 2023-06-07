@@ -8,11 +8,11 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:ui' as ui;
 import 'package:path/path.dart' as path;
 
-class PickAndCropImageResult {
+class MemoryNamedImage {
   final String filename;
   final Uint8List imageBytes;
 
-  const PickAndCropImageResult({
+  const MemoryNamedImage({
     required this.filename,
     required this.imageBytes,
   });
@@ -20,7 +20,7 @@ class PickAndCropImageResult {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PickAndCropImageResult &&
+      other is MemoryNamedImage &&
           runtimeType == other.runtimeType &&
           filename == other.filename &&
           imageBytes == other.imageBytes;
@@ -34,7 +34,7 @@ class PickAndCropImageResult {
   }
 }
 
-Future<PickAndCropImageResult?> pickAndCropImage({
+Future<MemoryNamedImage?> pickAndCropImage({
   required BuildContext context,
   required ImageSource imageSource,
   required double aspectRatio,
@@ -92,7 +92,7 @@ Future<PickAndCropImageResult?> pickAndCropImage({
       final data = await bitmap.toByteData(format: ui.ImageByteFormat.png);
       final bytes = data!.buffer.asUint8List();
 
-      return PickAndCropImageResult(
+      return MemoryNamedImage(
         filename: path.basenameWithoutExtension(file.path) + '.png',
         imageBytes: bytes,
       );

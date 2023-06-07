@@ -1,4 +1,4 @@
-import 'package:selfdevers/profile/profile_dto.dart';
+import 'package:selfdevers/api/users/dto/user_dto.dart';
 import 'package:selfdevers/profile/related_user_fields.dart';
 
 import 'user.dart';
@@ -9,6 +9,12 @@ class ProfileStateLoading extends ProfileState {}
 
 
 class ProfileStateNotFound extends ProfileState {}
+
+class ProfileStateLoaded extends ProfileState {
+  final UserDto userDto;
+
+  ProfileStateLoaded(this.userDto);
+}
 
 // Здесь будет кнопка подписки/запроса.
 // Нужно учитывать, вошёл ли пользователь.
@@ -23,8 +29,4 @@ class ProfileStateNotFound extends ProfileState {}
 //   unfollow,
 // }
 
-class ProfileStateLoaded extends ProfileState {
-  final ProfileDto profileDto;
 
-  ProfileStateLoaded(this.profileDto);
-}

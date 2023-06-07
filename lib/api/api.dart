@@ -32,7 +32,7 @@ class Api {
                 .loadAccessToken();
 
             if (accessToken == null) {
-              await ref.read(authNotifierProvider.notifier).logout();
+              await ref.read(authStateProvider.notifier).logout();
             } else {
               print('Перед добавлением accessToken в req');
               print('reqOptions.headers: ${reqOptions.headers}');
@@ -45,11 +45,11 @@ class Api {
         ));
   }
 
-  Future<Response<dynamic>> post(String method, [dynamic data]) async {
-    return _dio.post(method, data: data);
+  Future<Response<dynamic>> post(String method, [ dynamic data, CancelToken? cancelToken ]) async {
+    return _dio.post(method, data: data, cancelToken: cancelToken);
   }
 
-  Future<Response<dynamic>> get(String method, [dynamic data]) async {
+  Future<Response<dynamic>> get(String method, [dynamic data, CancelToken? cancelToken ]) async {
     return _dio.get(method);
   }
 

@@ -5,7 +5,7 @@ import 'package:selfdevers/followers_list/followers_state.dart';
 import 'package:selfdevers/profile/screens/profile_screen.dart';
 
 import '../profile/user.dart';
-import '../profile/widgets/user_circle_avatar.dart';
+import '../profile/widgets/user_avatar.dart';
 
 class FollowersListScreen extends StatelessWidget {
   final int userId;
@@ -71,7 +71,7 @@ class _FollowerTile extends StatelessWidget {
         ));
       },
       // Сделать какой-нибудь UserAvatar
-      leading: CircleUserAvatar(
+      leading: UserAvatar(
         imageProvider: (user.avatarUrl != null)
             ? NetworkImage(user.avatarUrl!)
             : null,

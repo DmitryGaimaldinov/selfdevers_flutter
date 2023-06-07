@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:selfdevers/profile/widgets/user_circle_avatar.dart';
+import 'package:selfdevers/profile/widgets/user_avatar.dart';
 
 class AvatarProfileImage extends StatelessWidget {
   // final double radius;
@@ -28,11 +28,12 @@ class AvatarProfileImage extends StatelessWidget {
 
     return CircleAvatar(
       radius: 40,
-      backgroundColor: Colors.white,
-      child: CircleUserAvatar(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      child: UserAvatar(
         radius: 38,
         imageProvider: imageProvider,
         showPlaceholder: showPlaceholder,
+        placeholderColor: Theme.of(context).primaryColor,
       ),
       // child: imageProvider != null
       //     ? CircleAvatar(

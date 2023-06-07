@@ -69,7 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _submitRegister() async {
+  Future<void> _submitLogin() async {
 
     // Валидно ли введён email
     final email = ref.read(emailInputProvider).trim();
@@ -92,13 +92,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // ref.read(passwordErrorTextProvider.notifier).state = passwordErrorText;
 
     if (emailErrorText == null) {
-
       try {
         // TODO: Сохранять access и refresh токены.
         // Изменить значение authProvider'ов.
-        await ref.read(authNotifierProvider.notifier).login(
+        await ref.read(authStateProvider.notifier).login(
             email: email,
             password: password);
+
+        Navigator.pop(context);
       } on AuthException catch (e) {
         if (e == AuthException.noSuchEmail) {
           ref.read(emailErrorTextProvider.notifier).state = e.message;
@@ -113,16 +114,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final backgroundColor = Theme.of(context).colorScheme.surface;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: backgroundColor,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: backgroundColor,
           statusBarIconBrightness: Brightness.dark,
         ),
-        toolbarHeight: 0.0,
+        // toolbarHeight: 0.0,
         elevation: 0.0,
       ),
       body: SafeArea(
@@ -164,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     SizedBox(height: 32),
                     LoginButton(
-                      onPressed: _submitRegister,
+                      onPressed: _submitLogin,
                       child: const Text('Войти'),
                     ),
                     Spacer(),

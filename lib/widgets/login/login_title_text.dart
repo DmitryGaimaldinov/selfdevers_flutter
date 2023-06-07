@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:selfdevers/widgets/animated_neon_text_style.dart';
 
 import '../../styles/text_styles.dart';
 
@@ -9,10 +10,15 @@ class LoginTitleText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyles.loginTitleStyle,
-      textAlign: TextAlign.center,
+    return AnimatedNeonTextStyle(
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+        ),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }

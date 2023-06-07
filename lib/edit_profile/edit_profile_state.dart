@@ -21,8 +21,8 @@ class EditProfileState {
   final String? avatarUrl;
   final String? backgroundUrl;
 
-  PickAndCropImageResult? newAvatarData;
-  PickAndCropImageResult? newBackgroundData;
+  MemoryNamedImage? newAvatarData;
+  MemoryNamedImage? newBackgroundData;
 
   String? nameErrorText;
   String? descriptionErrorText;

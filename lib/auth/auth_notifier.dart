@@ -10,16 +10,18 @@ import 'package:selfdevers/utils/secure_storage.dart';
 
 import '../api/api.dart';
 import '../api/api_services.dart';
+import '../api/auth/dto/auth_result_dto.dart';
 import '../api/status_codes.dart';
+import '../api/users/dto/user_dto.dart';
 import 'auth_result_dto.dart';
 import 'auth_state.dart';
 import 'exceptions/auth_exception.dart';
 
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref);
 });
 
-final currentUserProvider = StateProvider<User?>((ref) {
+final currentUserProvider = StateProvider<UserDto?>((ref) {
   return null;
 });
 
@@ -50,7 +52,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           .post(ApiServices.getUser, { 'userTag': 'id$userId' });
 
       if (response.statusCode == StatusCodes.created) {
-        ref.read(currentUserProvider.notifier).state = User.fromJson(response.data['user']);
+        ref.read(currentUserProvider.notifier).state = UserDto.fromJson(response.data);
+
         state = AuthStateLoggedIn();
       } else {
         state = AuthStateNotLoggedIn();
@@ -66,6 +69,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String password
   }) async {
     try {
+      debugPrint('REGISTER');
       final result = await ref.read(apiProvider).post(
         ApiServices.register,
         {
@@ -75,13 +79,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
         },
       );
 
+      print(result.data);
+
       final authResult = AuthResultDto.fromJson(result.data);
       ref.read(currentUserProvider.notifier).state = authResult.user;
       await _setAuthCredentials(authResult);
 
       state = AuthStateLoggedIn();
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response) {
+      if (e.type == DioErrorType.badResponse) {
         final response = e.response!;
 
         // Если это ошибка ввода данных
@@ -118,7 +124,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = AuthStateLoggedIn();
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response) {
+      if (e.type == DioErrorType.badResponse) {
         final response = e.response!;
         if (response.statusCode == StatusCodes.incorrectInput &&
             AuthException.isAuthException(response.data['message'])) {

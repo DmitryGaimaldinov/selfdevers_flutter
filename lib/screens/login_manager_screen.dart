@@ -9,7 +9,7 @@ enum LoginState {
 }
 
 final loginStateProvider = StateProvider<LoginState>((ref) {
-  return LoginState.register;
+  return LoginState.login;
 });
 
 

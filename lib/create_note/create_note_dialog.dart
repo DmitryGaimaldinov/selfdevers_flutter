@@ -1,51 +1,40 @@
-import 'dart:math';
-
-import 'package:appflowy_editor/appflowy_editor.dart';
-import 'package:drag_and_drop_lists/drag_and_drop_list.dart';
-import 'package:drag_and_drop_lists/drag_and_drop_lists.dart';
-import 'package:extended_text_field/extended_text_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
-import 'package:selfdevers/api/api.dart';
-import 'package:selfdevers/profile/widgets/avatar_profile_image.dart';
-import 'package:selfdevers/profile/widgets/user_circle_avatar.dart';
-import 'package:selfdevers/utils/my_special_text_span_builder.dart';
-import 'package:selfdevers/utils/todo_editing_controller.dart';
+import 'package:selfdevers/create_note/create_note_notifier.dart';
+import 'package:selfdevers/create_note/models/send_note_dto.dart';
+import 'package:selfdevers/profile/widgets/user_avatar.dart';
+import 'package:selfdevers/utils/photo_utils.dart';
+import 'package:selfdevers/widgets/button_progress_indicator.dart';
+import 'package:selfdevers/widgets/my_divider.dart';
+import 'package:selfdevers/widgets/neon_icon_button.dart';
+import 'package:selfdevers/widgets/neon_outlined_button.dart';
+import 'package:selfdevers/widgets/show_adaptive_dialog.dart';
+import 'package:path/path.dart' as path;
 
-import '../../widgets/popup_menu_tile.dart';
+Future<void> showCreateNoteDialog(BuildContext context) =>
+    showAdaptiveDialog(context: context, screen: CreateNoteScreen());
 
-Future<void> showCreateNoteDialog(BuildContext context) async {
-  await Navigator.push(context, PageRouteBuilder(
-      fullscreenDialog: true,
-      opaque: false,
-      barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.8),
-      pageBuilder: (context, _, __) => CreateNoteScreen(),
-      // builder: (context) => CreateNoteScreen(),
-  ));
-}
-
-
-
-// Можно все richTextController'ы и FocusNod'ы перекинуть в Provider'ы,
-// т.к. тут тоже есть методы dispose.
-// Но это будет, конечно, запутанная схема.
-
-final canSendNoteProvider = StateProvider.autoDispose<bool>((ref) {
+final _canSendNoteProvider = StateProvider.autoDispose<bool>((ref) {
   return false;
 });
 
-final canAddEmptyNoteProvider = StateProvider.autoDispose<bool>((ref) {
+final _canAddEmptyNoteProvider = StateProvider.autoDispose<bool>((ref) {
   return false;
 });
 
-// TODO: Может переделать всё на provider'ы?
+final _textLengthProvider = StateProvider.autoDispose<int?>((ref) {
+  return null;
+});
+
+final _canAddToDraftProvider = StateProvider.autoDispose<bool>((ref) {
+  return false;
+});
 
 
 class CreateNoteScreen extends ConsumerStatefulWidget {
@@ -57,10 +46,8 @@ class CreateNoteScreen extends ConsumerStatefulWidget {
 }
 
 class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
-  // final TextEditingController _textEditingController = TextEditingController();
-  // final FocusNode _textFocusNode = FocusNode();
-  // final FocusNode _textFocusNode2 = FocusNode();
-  // final FocusNode _textFocusNode3 = FocusNode();
+  final List<_DraftNoteViewDto> _draftNoteViewDtos = [];
+  int? _selectedNoteIndex;
 
   @override
   void initState() {
@@ -70,13 +57,22 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
     });
   }
 
-  final List<_CreateNoteViewDto> _createNoteViewDtos = [];
-  // late final Map<UniqueKey, _CreateNoteViewDto> _createNoteViewDtos;
-
-  int? _focusedNoteIndex;
-
-  void _onNoteContentChanged() {
-
+  Future<void> _send() async {
+    try {
+      await ref.read(createNoteStateProvider.notifier).send(
+          sendNoteDtos: _draftNoteViewDtos
+              .map((draftNoteViewDto) => SendNoteDto(
+                  text: draftNoteViewDto.richTextController.text,
+                  imageXFiles: draftNoteViewDto.imageXFiles,
+                  quotedNoteId: null))
+              .toList());
+      if (mounted) {
+        Fluttertoast.showToast(msg: 'Посты отправлены!');
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void _addEmptyNoteAt(int index) {
@@ -93,181 +89,211 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
         },
         onMatch: (List<String> matches) {},
         onMatchIndex: (List<Map<String, List<int>>> matches) {
-          findNoteDtoByKey(key).matches = matches;
+          _findNoteDtoByKey(key).matches = matches;
         });
-    richTextController.addListener(() {
-        final createNoteViewDto = findNoteDtoByKey(key);
-
-        final selectionStart = richTextController.selection.start;
-        final selectionEnd = richTextController.selection.end;
-
-        // TODO: Нужно будет показывать список пользователей по matchedText
-        final matchedText = createNoteViewDto.matches.firstWhereOrNull((match) {
-          bool hasMatchedTextInSelection = false;
-
-          match.forEach((text, indexes) {
-            int matchStart = indexes[0];
-            int matchEnd = indexes[1];
-
-            // Если курсор находится в пределах мэтча специальных слов
-            // при создании поста. Например, упоминаний "@name".
-            if (!(selectionStart > matchEnd + 1 ||
-                matchStart - 1 > selectionEnd)) {
-              hasMatchedTextInSelection = true;
-            }
-          });
-
-          return hasMatchedTextInSelection;
-        });
-        _recalculateCanAddEmptyNote();
-    });
-
-    _createNoteViewDtos.insert(
+    richTextController.addListener(() => _onNoteContentChanged(key));
+    _draftNoteViewDtos.insert(
         index,
-        _CreateNoteViewDto(
+        _DraftNoteViewDto(
           key: key,
-          hintText: 'Напишите что-нибудь',
           richTextController: richTextController,
           focusNode: focusNode,
-          showLineToNextNote: false,
         ),
     );
 
+    _recalculateSelectedNoteLength();
     _recalculateCanAddEmptyNote();
     _recalculateThreadLines();
   }
 
   void _onNoteFocusChanged() {
-    final newFocusedNoteIndex = _createNoteViewDtos.indexWhere((dto) => dto.focusNode.hasFocus);
+    final newFocusedNoteIndex = _draftNoteViewDtos.indexWhere((dto) => dto.focusNode.hasFocus);
     if (newFocusedNoteIndex != -1) {
-      _focusedNoteIndex = newFocusedNoteIndex;
+      _selectedNoteIndex = newFocusedNoteIndex;
     }
 
-    // Setting opacity for every note
-    setState(() {
-      for(int i = 0; i < _createNoteViewDtos.length; i++) {
-        final dto = _createNoteViewDtos[i];
-        if (i == _focusedNoteIndex) {
-          dto.opacity = 1;
-        } else {
-          dto.opacity = 0.6;
-        }
-      }
-    });
     _recalculateCanAddEmptyNote();
+    _recalculateSelectedNoteLength();
+
+    setState(() {});
+  }
+
+  void _onNoteContentChanged(UniqueKey key) {
+    final draftNoteDto = _findNoteDtoByKey(key);
+
+    final textController = draftNoteDto.richTextController;
+
+    final selectionStart = textController.selection.start;
+    final selectionEnd = textController.selection.end;
+
+    String? matchedText;
+    for (var match in draftNoteDto.matches) {
+      match.forEach((text, indexes) {
+        int matchStart = indexes[0];
+        int matchEnd = indexes[1];
+
+        // Если курсор находится в пределах мэтча специальных слов
+        // при создании поста. Например, упоминаний "@name".
+        if (!(selectionStart > matchEnd + 1 || matchStart - 1 > selectionEnd)) {
+          if (matchedText != null) {
+            matchedText = text;
+          }
+        }
+      });
+
+      // Если нашли первое слово, которое начинается со специального знака,
+      // прекращаем искать специальные слова
+      if (matchedText != null) {
+        break;
+      }
+    }
+
+    // TODO: Показывать список пользователей по matchedText
+    if (matchedText != null) {}
+
+    _recalculateSelectedNoteLength();
+    _recalculateCanAddEmptyNote();
+    _recalculateCanSendNote();
+    _recalculateCanAddToDraft();
+  }
+
+  void _recalculateCanSendNote() {
+    ref.read(_canSendNoteProvider.notifier).state =
+        _draftNoteViewDtos.every((draftNoteDto) => draftNoteDto.isNoteNotEmpty());
+  }
+
+  void _recalculateSelectedNoteLength() {
+    debugPrint('Создание поста. Обновление длины текущего поста: ${_selectedNoteDto?.richTextController.text.length}');
+    ref.read(_textLengthProvider.notifier).state =
+        _selectedNoteDto?.richTextController.text.length;
   }
 
   Future<void> _recalculateCanAddEmptyNote() async {
     final bool canAddEmptyNote;
-    if (_focusedNoteIndex == null) {
+    if (_selectedNoteIndex == null) {
       canAddEmptyNote = false;
     } else {
-      canAddEmptyNote = _createNoteViewDtos[_focusedNoteIndex!].isNoteNotEmpty();
+      canAddEmptyNote = _draftNoteViewDtos[_selectedNoteIndex!].isNoteNotEmpty();
     }
 
-    ref.read(canAddEmptyNoteProvider.notifier).state = canAddEmptyNote;
+    ref.read(_canAddEmptyNoteProvider.notifier).state = canAddEmptyNote;
   }
 
   void _recalculateThreadLines() {
-    for (int i = 0; i < _createNoteViewDtos.length; i++) {
-      bool isLastNote = i == _createNoteViewDtos.length-1;
-      _createNoteViewDtos[i].showLineToNextNote = !isLastNote;
-    }
     setState(() {});
   }
 
-  void _deleteNoteAt(int index) {
-    final removedNoteViewDto = _createNoteViewDtos.removeAt(index);
-    removedNoteViewDto.dispose();
-
-    if (index == _focusedNoteIndex) {
-      _createNoteViewDtos[index - 1].focusNode.requestFocus();
-    }
-
-    _recalculateThreadLines();
+  void _recalculateCanAddToDraft() {
+    ref.read(_canAddToDraftProvider.notifier).state =
+        _draftNoteViewDtos.any((dto) => dto.isNoteNotEmpty());
   }
 
-  _CreateNoteViewDto findNoteDtoByKey(UniqueKey key) {
-    return _createNoteViewDtos.firstWhere((dto) => dto.key == key);
+  void _deleteNoteAt(int index) {
+    if (index == _selectedNoteIndex) {
+      _draftNoteViewDtos[index - 1].focusNode.requestFocus();
+    }
+
+    if (_selectedNoteIndex == _draftNoteViewDtos.length-1) {
+      _draftNoteViewDtos[_draftNoteViewDtos.length-1].focusNode.requestFocus();
+    }
+
+    final removedNoteViewDto = _draftNoteViewDtos.removeAt(index);
+    removedNoteViewDto.dispose();
+    _recalculateThreadLines();
+    _recalculateCanSendNote();
+  }
+
+  _DraftNoteViewDto _findNoteDtoByKey(UniqueKey key) {
+    return _draftNoteViewDtos.firstWhere((dto) => dto.key == key);
+  }
+
+  _DraftNoteViewDto? get _selectedNoteDto {
+    if (_selectedNoteIndex == null || _selectedNoteIndex! >= _draftNoteViewDtos.length) {
+      return null;
+    }
+
+    return _draftNoteViewDtos[_selectedNoteIndex!];
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // if (constraints.maxWidth > 550) {
-        //   return Center(
-        //     child: SingleChildScrollView(
-        //       child: SizedBox(
-        //         height: 500,
-        //         width: 500,
-        //         child: Column(
-        //           children: [
-        //             AppBar(
-        //               title: Text('Создание поста'),
-        //             ),
-        //             Expanded(
-        //               child: Container(
-        //                 decoration: BoxDecoration(
-        //                   color: Colors.black,
-        //                 ),
-        //               ),
-        //             ),
-        //           ],
-        //         ),
-        //       ),
-        //     ),
-        //   );
-        // }
+    final createNoteState = ref.watch(createNoteStateProvider);
+    final isSending = createNoteState.isSending;
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('Создание поста'),
-          ),
-          body: Column(
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        title: Text('Создание поста'),
+        actions: [
+          // Черновик
+          // Consumer(
+          //   builder: (context, ref, child) {
+          //     final canAddToDraft = ref.watch(_canAddToDraftProvider);
+          //
+          //     if (canAddToDraft) {
+          //       return TextButton(
+          //         onPressed: () {},
+          //         child: Text('В черновик')
+          //       );
+          //     }
+          //
+          //     return const SizedBox();
+          //   },
+          // ),
+          // SizedBox(width: 16),
+        ],
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
             children: [
+              if (isSending)
+                LinearProgressIndicator(),
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
-                      children: List.generate(_createNoteViewDtos.length, (index) {
-                        final dto = _createNoteViewDtos[index];
-                        final canBeDeleted = index != 0;
+                      children: List.generate(_draftNoteViewDtos.length, (index) {
+                        final dto = _draftNoteViewDtos[index];
+                        final canBeDeleted = (index != 0) && !isSending;
+
+                        final isLastNote = index == _draftNoteViewDtos.length-1;
 
                         return Opacity(
-                          opacity: dto.opacity,
-                          child: _CreateNoteView(
+                          opacity: (index == _selectedNoteIndex && !isSending) ? 1 : 0.6,
+                          child: _DraftNoteView(
                             key: dto.key,
-                            hintText: dto.hintText,
+                            hintText: (index == 0)
+                                ? 'Напишите что-нибудь'
+                                : 'Напишите ещё что-нибудь',
                             focusNode: dto.focusNode,
                             textEditingController: dto.richTextController,
-                            showLineToNextNote: dto.showLineToNextNote,
-                            // onContentChanged: (String text, List<String> images) {
-                            //   // TODO: Чтобы этот контент хранился в
-                            // }
+                            showLineToNextNote: !isLastNote,
                             deleteButton: canBeDeleted
                                 ? _DeleteNoteButton(
                                     onPressed: () => _deleteNoteAt(index),
                                   )
                                 : null,
-                            imageProviders: dto.imagePaths.map<ImageProvider>((path) {
+                            imageProviders: dto.imageXFiles.map<ImageProvider>((xFile) {
                               if (kIsWeb) {
-                                return NetworkImage(path);
+                                return NetworkImage(xFile.path);
                               } else {
-                                return AssetImage(path);
+                                return AssetImage(xFile.path);
                               }
                             }).toList(),
-                            // onDelete: () {
-                            //   _deleteNoteByKey(dto.key);
-                            // },
+                            onImageDeleted: (int imageIndex) {
+                              setState(() {
+                                dto.imageXFiles.removeAt(imageIndex);
+                              });
+                            },
                           ),
                         );
                       })..add(MouseRegion(
                         cursor: SystemMouseCursors.text,
                         child: GestureDetector(
                           onTap: () {
-                            _createNoteViewDtos.last.focusNode.requestFocus();
+                            _draftNoteViewDtos.last.focusNode.requestFocus();
                           },
                           child: Container(
                             height: constraints.maxHeight,
@@ -305,20 +331,45 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
               ),
               _BottomEditingBar(
                 actions: [
-                  IconButton(
-                    // TODO: Сделать, чтобы нельзя было добавлять больше 4-х изображений
-                    // if (_focusedNoteIndex != null && _createNoteViewDtos[_focusNoteIndex].imagePaths <= 3
-                    onPressed: (_focusedNoteIndex != null)
+                  NeonIconButton(
+                    onPressed: (_selectedNoteDto != null &&
+                                _selectedNoteDto!.imageXFiles.length < 4 &&
+                                !isSending)
                         ? () async {
-                            var imageFiles = await ImagePicker().pickMultiImage();
-                            if (imageFiles.length > 4) {
-                              imageFiles = imageFiles.sublist(0, 3);
+                            // Текущие изображения в посте
+                            final selectedNoteDto = _selectedNoteDto!;
+                            var imageXFiles = selectedNoteDto.imageXFiles;
+
+                            // Выбираем ещё изображения
+                            List<XFile> pickedImageXFiles = await ImagePicker().pickMultiImage();
+
+                            // Проверяем расширения изображений
+                            bool pickedWrongExtension = pickedImageXFiles.any((xFile) {
+                              final extension = path.extension(xFile.name);
+                              return !PhotoUtils.isSupportedExtension(extension);
+                            });
+                            // Если есть неподдерживаемые, убираем такие изображения
+                            if (pickedWrongExtension) {
+                              Fluttertoast.showToast(msg: 'Выбрано изображение с неразрешённым расширением');
+                              pickedImageXFiles.removeWhere((xFile) =>
+                                  !PhotoUtils.isSupportedExtension(path.extension(xFile.name)));
+                            }
+
+                            imageXFiles = [
+                              ...imageXFiles,
+                              ...pickedImageXFiles
+                            ];
+
+                            if (imageXFiles.length > 4) {
+                              imageXFiles = imageXFiles.sublist(0, 4);
+                              Fluttertoast.showToast(msg: 'Нельзя добавить больше 4 изображений');
                             }
 
                             setState(() {
-                              _createNoteViewDtos[_focusedNoteIndex!].imagePaths =
-                                  imageFiles.map((e) => e.path).toList();
+                              _draftNoteViewDtos[_selectedNoteIndex!].imageXFiles =
+                                  imageXFiles;
                             });
+                            _onNoteContentChanged(selectedNoteDto.key);
                           }
                         : null,
                     icon: Icon(Icons.photo),
@@ -326,15 +377,12 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
                 ],
                 addNoteButton: Consumer(
                   builder: (context, ref, _) {
-                    final canAdd = ref.watch(canAddEmptyNoteProvider);
-
-                    print('canAdd: $canAdd');
+                    final canAdd = ref.watch(_canAddEmptyNoteProvider) &&
+                        !isSending;
 
                     if (canAdd) {
                       return _AddEmptyNoteButton(
-                        onAddPressed: () {
-                          _addEmptyNoteAt(_focusedNoteIndex! + 1);
-                        },
+                        onPressed: () => _addEmptyNoteAt(_selectedNoteIndex! + 1)
                       );
                     }
 
@@ -343,21 +391,38 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
                 ),
                 publishButton: Consumer(
                   builder: (context, ref, _) {
-                    final canSend = ref.watch(canSendNoteProvider);
+                    final canSend = ref.watch(_canSendNoteProvider) && !isSending;
 
-                    return FilledButton(
+                    return NeonOutlinedButton(
                       onPressed: canSend
-                          ? () {}
+                          ? _send
                           : null,
+                      // child: createNoteState.isSending
+                      //     ? const ButtonProgressIndicator()
+                      //     : Text('Опубликовать'),
                       child: Text('Опубликовать'),
                     );
                   }
                 ),
+                lengthCounterView: Consumer(
+                  builder: (context, ref, _) {
+                    final length = ref.watch(_textLengthProvider);
+
+                    if (length == null) {
+                      return const SizedBox();
+                    }
+
+                    return Text(
+                      '$length/500',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    );
+                  },
+                )
               ),
             ],
-          ),
-        );
-      },
+          );
+        }
+      ),
     );
   }
 }
@@ -372,60 +437,49 @@ class _DeleteNoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return NeonIconButton(
       onPressed: onPressed,
-      icon: Icon(Icons.close),
-      iconSize: 20,
-      color: Theme.of(context).primaryColor,
+      icon: Icon(Icons.close, size: 20),
+      // color: Theme.of(context).primaryColor,
     );
   }
 }
 
 
 class _AddEmptyNoteButton extends ConsumerWidget {
-  final void Function() onAddPressed;
+  final void Function()? onPressed;
 
   const _AddEmptyNoteButton({
     Key? key,
-    required this.onAddPressed
+    required this.onPressed
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return IconButton(
-      focusNode: FocusNode()..addListener(() {
-        print('BUTTON FOCUS NODE WORKED');
-      }),
-      onPressed: onAddPressed,
+    return NeonIconButton(
+      onPressed: onPressed,
       icon: Icon(Icons.add),
-      color: Theme.of(context).primaryColor,
     );
   }
 }
 
-class _CreateNoteViewDto {
+class _DraftNoteViewDto {
   final UniqueKey key;
-  final String hintText;
   final RichTextController richTextController;
   final FocusNode focusNode;
-  bool showLineToNextNote;
-  List<String> imagePaths;
-  double opacity;
+  List<XFile> imageXFiles;
   List<Map<String, List<int>>> matches;
 
-  _CreateNoteViewDto({
+  _DraftNoteViewDto({
     required this.key,
-    required this.hintText,
     required this.richTextController,
     required this.focusNode,
-    this.showLineToNextNote = false,
-    this.imagePaths = const [],
-    this.opacity = 1,
+    this.imageXFiles = const [],
     this.matches = const [],
   });
 
   bool isNoteEmpty() {
-    if (richTextController.text.trim().isEmpty && imagePaths.isEmpty) {
+    if (richTextController.text.trim().isEmpty && imageXFiles.isEmpty) {
       return true;
     }
 
@@ -454,15 +508,16 @@ class _CreateNoteViewDto {
 //   }
 // }
 
-class _CreateNoteView extends StatelessWidget {
+class _DraftNoteView extends ConsumerWidget {
   final String hintText;
   final TextEditingController textEditingController;
   final bool showLineToNextNote;
   final FocusNode focusNode;
   final _DeleteNoteButton? deleteButton;
   final List<ImageProvider> imageProviders;
+  final void Function(int imageIndex) onImageDeleted;
 
-  const _CreateNoteView({
+  const _DraftNoteView({
     Key? key,
     required this.hintText,
     required this.textEditingController,
@@ -470,13 +525,13 @@ class _CreateNoteView extends StatelessWidget {
     required this.focusNode,
     this.deleteButton,
     this.imageProviders = const [],
+    required this.onImageDeleted,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final avatarRadius = 20.0;
     final bottomLineWidth = 2.0;
-    final bottomLineLeftPadding = avatarRadius - bottomLineWidth / 2.0;
 
     final theme = Theme.of(context);
 
@@ -498,7 +553,7 @@ class _CreateNoteView extends StatelessWidget {
                       children: [
                         Column(
                           children: [
-                            CircleUserAvatar(
+                            UserAvatar(
                               radius: avatarRadius,
                             ),
                             if (showLineToNextNote)
@@ -519,10 +574,11 @@ class _CreateNoteView extends StatelessWidget {
                                 TextFormField(
                                   focusNode: focusNode,
                                   controller: textEditingController,
+                                  enabled: !ref.watch(createNoteStateProvider).isSending,
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
                                     hintText: 'Напишите что-нибудь',
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                    contentPadding: const EdgeInsets.only(bottom: 16),
                                     suffixIcon: Opacity(
                                       opacity: 0,
                                       child: _DeleteNoteButton(onPressed: null)
@@ -532,8 +588,19 @@ class _CreateNoteView extends StatelessWidget {
                                   maxLines: null,
                                   textCapitalization: TextCapitalization.sentences,
                                   maxLength: 500,
+                                  buildCounter: (
+                                      BuildContext context,
+                                      {
+                                        required int currentLength,
+                                        required int? maxLength,
+                                        required bool isFocused,
+                                      }
+                                  ) {
+                                    return null;
+                                  },
                                 ),
                                 _buildImages(),
+                                SizedBox(height: 16),
                               ],
                             ),
                           ),
@@ -587,13 +654,19 @@ class _CreateNoteView extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: _CreateNoteImageView(imageProvider: imageProviders[0])
+                  child: _DraftNoteImageView(
+                    imageProvider: imageProviders[0],
+                    onDeletePressed: () => onImageDeleted(0),
+                  )
                 ),
                 if (imageProviders.length == 4)
                   const SizedBox(height: spaceBetween),
                 if (imageProviders.length == 4)
                   Expanded(
-                    child: _CreateNoteImageView(imageProvider: imageProviders[2])
+                    child: _DraftNoteImageView(
+                      imageProvider: imageProviders[2],
+                      onDeletePressed: () => onImageDeleted(2),
+                    )
                   ),
               ],
             )
@@ -605,17 +678,26 @@ class _CreateNoteView extends StatelessWidget {
               child: Column(
                 children: [
                   Expanded(
-                    child: _CreateNoteImageView(imageProvider: imageProviders[1])
+                    child: _DraftNoteImageView(
+                      imageProvider: imageProviders[1],
+                      onDeletePressed: () => onImageDeleted(1),
+                    )
                   ),
                   if (imageProviders.length == 3 || imageProviders.length == 4)
                     const SizedBox(height: spaceBetween),
                   if (imageProviders.length == 3)
                     Expanded(
-                      child: _CreateNoteImageView(imageProvider: imageProviders[2])
+                      child: _DraftNoteImageView(
+                        imageProvider: imageProviders[2],
+                        onDeletePressed: () => onImageDeleted(2),
+                      )
                     ),
                   if (imageProviders.length == 4)
                     Expanded(
-                      child: _CreateNoteImageView(imageProvider: imageProviders[3])
+                      child: _DraftNoteImageView(
+                        imageProvider: imageProviders[3],
+                        onDeletePressed: () => onImageDeleted(3),
+                      )
                     ),
                 ],
               )
@@ -626,57 +708,77 @@ class _CreateNoteView extends StatelessWidget {
   }
 }
 
-class _CreateNoteImageView extends StatelessWidget {
+class _DraftNoteImageView extends StatelessWidget {
   final ImageProvider imageProvider;
+  final void Function() onDeletePressed;
 
-  const _CreateNoteImageView({
+  const _DraftNoteImageView({
     Key? key,
     required this.imageProvider,
+    required this.onDeletePressed,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.black38,
-        image: DecorationImage(
-          image: imageProvider,
-          fit: BoxFit.cover,
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.black38,
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
-      ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: IconButton(
+            onPressed: onDeletePressed,
+            icon: Icon(Icons.close),
+            color: Colors.white,
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black,
+              fixedSize: const Size(32, 32),
+              maximumSize: const Size(32, 32),
+              minimumSize: const Size(32, 32),
+            ),
+            iconSize: 16,
+          ),
+        ),
+      ],
     );
   }
 }
 
 
-class _BottomEditingBar extends StatelessWidget {
+class _BottomEditingBar extends ConsumerWidget {
   final List<Widget> actions;
   final Widget addNoteButton;
   final Widget publishButton;
+  final Widget? lengthCounterView;
 
   const _BottomEditingBar({
     Key? key,
     required this.actions,
     required this.addNoteButton,
     required this.publishButton,
+    required this.lengthCounterView,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: double.infinity,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Divider(
-            thickness: 1,
-            height: 1,
-            color: Colors.black38,
-          ),
+          MyDivider(),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
             ),
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             child: Row(
@@ -688,6 +790,11 @@ class _BottomEditingBar extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (lengthCounterView != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: lengthCounterView!,
+                  ),
                 addNoteButton,
                 SizedBox(width: 8),
                 publishButton,

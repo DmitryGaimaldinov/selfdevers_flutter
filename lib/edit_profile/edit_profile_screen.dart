@@ -12,18 +12,20 @@ import 'package:path_provider/path_provider.dart';
 import 'package:selfdevers/api/api.dart';
 import 'package:selfdevers/api/api_services.dart';
 import 'package:selfdevers/edit_profile/edit_profile_notifier.dart';
+import 'package:selfdevers/main.dart';
 import 'package:selfdevers/screens/crop_image_screen.dart';
 import 'package:selfdevers/profile/pick_and_crop_image.dart';
 import 'package:selfdevers/utils/no_whitespaces_text_input_formatter.dart';
 
 import '../api/status_codes.dart';
+import '../api/users/dto/user_dto.dart';
 import '../profile/user.dart';
 import '../profile/widgets/avatar_profile_image.dart';
 import '../profile/widgets/background_profile_image.dart';
 import 'edit_profile_state.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
-  final User user;
+  final UserDto user;
 
   const EditProfileScreen({
     Key? key,
@@ -150,220 +152,229 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: editProfileState.saveState == EditProfileSaveState.savingInProgress
-                  ? CircularProgressIndicator()
-                  : TextButton(
-                      onPressed: editProfileState.canSave
-                          ? () {
-                        editProfileNotifier.save();
-                      }
-                          : null,
-                      child: Text('Сохранить'),
-                    ),
+                ? CircularProgressIndicator()
+                : TextButton(
+                    onPressed: editProfileState.canSave
+                        ? () {
+                      editProfileNotifier.save();
+                    }
+                        : null,
+                    child: Text('Сохранить'),
+                  ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        child: // Профиль
-        LayoutBuilder(
-            builder: (context, constraints) {
-              final backgroundHeight = constraints.maxWidth / 3;
-              final totalHeaderHeight = backgroundHeight + 40;
+        child: CenterConstrained(
+          child: LayoutBuilder(
+              builder: (context, constraints) {
+                final backgroundHeight = constraints.maxWidth / 3;
+                final totalHeaderHeight = backgroundHeight + 40;
 
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Stack(
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(16.0),
+                    )
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        height: totalHeaderHeight,
-                        color: Colors.transparent,
-                      ),
-                      PopupMenuButton(
-                        tooltip: 'Сменить задний фон',
-                        position: PopupMenuPosition.under,
-                        offset: Offset(24, 0),
-                        itemBuilder: (BuildContext context) => [
-                          PopupMenuItem<int>(
-                              value: 0,
-                              onTap: () async {
-                                final croppedImageData = await pickAndCropImage(
-                                    context: context,
-                                    imageSource: ImageSource.gallery,
-                                    aspectRatio: 3 / 1
-                                );
-                                if (croppedImageData != null) {
-                                  editProfileNotifier.setBackground(croppedImageData);
-                                }
-                              },
-                              child: ListTile(
-                                title: const Text('Новое фото'),
-                              )),
-                          if (editProfileState.canRestoreBackground)
-                            PopupMenuItem<int>(
-                                value: 1,
-                                onTap: () {
-                                  editProfileNotifier.restoreOldBackground();
-                                },
-                                child: ListTile(
-                                  title: const Text('Вернуть старое фото'),
-                                )),
-                          if (editProfileState.canDeleteBackground)
-                            PopupMenuItem<int>(
-                                value: 1,
-                                onTap: () {
-                                  editProfileNotifier.deleteBackground();
-                                },
-                                child: ListTile(
-                                  title: const Text('Удалить фото'),
-                                )),
-                        ],
-                        child: Stack(
-                          children: [
-                            BackgroundProfileImage(
-                              height: backgroundHeight,
-                              imageProvider: backgroundImageProvider,
-                            ),
-                            Positioned.fill(
-                              child: Container(
-                                width: 76,
-                                height: 76,
-                                color: Colors.black.withOpacity(0.5),
-                                child: Icon(
-                                  Icons.camera_alt_outlined,
-                                  color: Colors.white,
-                                  size: 28,
+                      Stack(
+                        children: [
+                          Container(
+                            height: totalHeaderHeight,
+                            color: Colors.transparent,
+                          ),
+                          PopupMenuButton(
+                            tooltip: 'Сменить задний фон',
+                            position: PopupMenuPosition.under,
+                            offset: Offset(24, 0),
+                            itemBuilder: (BuildContext context) => [
+                              PopupMenuItem<int>(
+                                  value: 0,
+                                  onTap: () async {
+                                    final croppedImageData = await pickAndCropImage(
+                                        context: context,
+                                        imageSource: ImageSource.gallery,
+                                        aspectRatio: 3 / 1
+                                    );
+                                    if (croppedImageData != null) {
+                                      editProfileNotifier.setBackground(croppedImageData);
+                                    }
+                                  },
+                                  child: ListTile(
+                                    title: const Text('Новое фото'),
+                                  )),
+                              if (editProfileState.canRestoreBackground)
+                                PopupMenuItem<int>(
+                                    value: 1,
+                                    onTap: () {
+                                      editProfileNotifier.restoreOldBackground();
+                                    },
+                                    child: ListTile(
+                                      title: const Text('Вернуть старое фото'),
+                                    )),
+                              if (editProfileState.canDeleteBackground)
+                                PopupMenuItem<int>(
+                                    value: 1,
+                                    onTap: () {
+                                      editProfileNotifier.deleteBackground();
+                                    },
+                                    child: ListTile(
+                                      title: const Text('Удалить фото'),
+                                    )),
+                            ],
+                            child: Stack(
+                              children: [
+                                BackgroundProfileImage(
+                                  height: backgroundHeight,
+                                  imageProvider: backgroundImageProvider,
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        left: 16,
-                        bottom: 0,
-                        child: PopupMenuButton(
-                          tooltip: 'Сменить аватарку',
-                          position: PopupMenuPosition.under,
-                          offset: Offset(24, 0),
-                          itemBuilder: (BuildContext context) => [
-                            PopupMenuItem<int>(
-                                value: 0,
-                                onTap: () async {
-                                  final croppedImageData = await pickAndCropImage(
-                                    context: context,
-                                    imageSource: ImageSource.gallery,
-                                    aspectRatio: 1 / 1,
-                                  );
-                                  if (croppedImageData != null) {
-                                    editProfileNotifier.setAvatar(croppedImageData);
-                                  }
-                                },
-                                child: ListTile(
-                                  title: const Text('Новое фото'),
-                                )),
-                            if (editProfileState.canRestoreAvatar)
-                              PopupMenuItem<int>(
-                                  value: 1,
-                                  onTap: () {
-                                    editProfileNotifier.restoreOldAvatar();
-                                  },
-                                  child: ListTile(
-                                    title: const Text('Вернуть старое фото'),
-                                  )),
-                            if (editProfileState.canDeleteAvatar)
-                              PopupMenuItem<int>(
-                                  value: 1,
-                                  onTap: () {
-                                    editProfileNotifier.deleteAvatar();
-                                  },
-                                  child: ListTile(
-                                    title: const Text('Удалить фото'),
-                                  )),
-                          ],
-
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              AvatarProfileImage(
-                                // imageBytes: _avatarImageBytes,
-                                imageProvider: avatarImageProvider,
-                                showPlaceholder: false,
-                              ),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(40.0),
-                                child: Container(
-                                  width: 76,
-                                  height: 76,
-                                  color: Colors.black.withOpacity(0.5),
-                                  child: Icon(
-                                    Icons.camera_alt_outlined,
-                                    color: Colors.white,
-                                    size: 28,
+                                Positioned.fill(
+                                  child: Container(
+                                    width: 76,
+                                    height: 76,
+                                    color: Colors.black.withOpacity(0.5),
+                                    child: Icon(
+                                      Icons.camera_alt_outlined,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
+                          Positioned(
+                            left: 16,
+                            bottom: 0,
+                            child: PopupMenuButton(
+                              tooltip: 'Сменить аватарку',
+                              position: PopupMenuPosition.under,
+                              offset: Offset(24, 0),
+                              itemBuilder: (BuildContext context) => [
+                                PopupMenuItem<int>(
+                                    value: 0,
+                                    onTap: () async {
+                                      final croppedImageData = await pickAndCropImage(
+                                        context: context,
+                                        imageSource: ImageSource.gallery,
+                                        aspectRatio: 1 / 1,
+                                      );
+                                      if (croppedImageData != null) {
+                                        editProfileNotifier.setAvatar(croppedImageData);
+                                      }
+                                    },
+                                    child: ListTile(
+                                      title: const Text('Новое фото'),
+                                    )),
+                                if (editProfileState.canRestoreAvatar)
+                                  PopupMenuItem<int>(
+                                      value: 1,
+                                      onTap: () {
+                                        editProfileNotifier.restoreOldAvatar();
+                                      },
+                                      child: ListTile(
+                                        title: const Text('Вернуть старое фото'),
+                                      )),
+                                if (editProfileState.canDeleteAvatar)
+                                  PopupMenuItem<int>(
+                                      value: 1,
+                                      onTap: () {
+                                        editProfileNotifier.deleteAvatar();
+                                      },
+                                      child: ListTile(
+                                        title: const Text('Удалить фото'),
+                                      )),
+                              ],
+
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  AvatarProfileImage(
+                                    // imageBytes: _avatarImageBytes,
+                                    imageProvider: avatarImageProvider,
+                                    showPlaceholder: false,
+                                  ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(40.0),
+                                    child: Container(
+                                      width: 76,
+                                      height: 76,
+                                      color: Colors.black.withOpacity(0.5),
+                                      child: Icon(
+                                        Icons.camera_alt_outlined,
+                                        color: Colors.white,
+                                        size: 28,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 16),
+                            TextField(
+                              decoration: InputDecoration(
+                                label: Text('Имя'),
+                                errorText: editProfileState.nameErrorText,
+                              ),
+                              maxLength: 20,
+                              controller: _nameController,
+                            ),
+                            SizedBox(height: 16),
+                            TextField(
+                              decoration: InputDecoration(
+                                label: Text('О себе'),
+                                errorText: editProfileState.descriptionErrorText,
+                              ),
+                              minLines: 3,
+                              maxLines: null,
+                              maxLength: 140,
+                              keyboardType: TextInputType.text,
+                              controller: _descriptionController,
+                              // inputFormatters: [
+                              //   FilteringTextInputFormatter.deny('')
+                              // ],
+                            ),
+                            SizedBox(height: 8),
+                            TextField(
+                              decoration: InputDecoration(
+                                label: Text('Тэг'),
+                                errorText: editProfileState.tagErrorText
+                              ),
+                              maxLength: 20,
+                              controller: _tagController,
+                              inputFormatters: [
+                                NoWhitespacesTextInputFormatter(),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                            _ProfilePrivacySwitch(
+                              initialValue: editProfileState.isPrivate,
+                              onChanged: (newValue) {
+                                editProfileNotifier.privacyChanged(newValue);
+                              },
+                            ),
+                            SizedBox(height: 24),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 16),
-                        TextField(
-                          decoration: InputDecoration(
-                            label: Text('Имя'),
-                            errorText: editProfileState.nameErrorText,
-                          ),
-                          maxLength: 20,
-                          controller: _nameController,
-                        ),
-                        SizedBox(height: 16),
-                        TextField(
-                          decoration: InputDecoration(
-                            label: Text('О себе'),
-                            errorText: editProfileState.descriptionErrorText,
-                          ),
-                          minLines: 3,
-                          maxLines: null,
-                          maxLength: 140,
-                          keyboardType: TextInputType.text,
-                          controller: _descriptionController,
-                          // inputFormatters: [
-                          //   FilteringTextInputFormatter.deny('')
-                          // ],
-                        ),
-                        SizedBox(height: 8),
-                        TextField(
-                          decoration: InputDecoration(
-                            label: Text('Тэг'),
-                            errorText: editProfileState.tagErrorText
-                          ),
-                          maxLength: 20,
-                          controller: _tagController,
-                          inputFormatters: [
-                            NoWhitespacesTextInputFormatter(),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        _ProfilePrivacySwitch(
-                          initialValue: editProfileState.isPrivate,
-                          onChanged: (newValue) {
-                            editProfileNotifier.privacyChanged(newValue);
-                          },
-                        ),
-                        SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }
+                );
+              }
+          ),
         ),
       ),
     );

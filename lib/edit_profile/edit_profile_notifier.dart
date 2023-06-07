@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:selfdevers/api/api.dart';
 import 'package:selfdevers/api/api_services.dart';
-import 'package:selfdevers/profile/profile_dto.dart';
+import 'package:selfdevers/api/users/dto/user_dto.dart';
 import 'package:selfdevers/profile/profile_notifier.dart';
 import 'package:selfdevers/profile/user_validator.dart';
 
@@ -11,21 +11,21 @@ import '../profile/pick_and_crop_image.dart';
 import '../profile/user.dart';
 import 'edit_profile_state.dart';
 
-final editProfileNotifierProvider = StateNotifierProvider.family.autoDispose<EditProfileNotifier, EditProfileState, User>((ref, user) {
+final editProfileNotifierProvider = StateNotifierProvider.family.autoDispose<EditProfileNotifier, EditProfileState, UserDto>((ref, user) {
   return EditProfileNotifier(ref, user);
 });
 
 class EditProfileNotifier extends StateNotifier<EditProfileState> {
   final Ref _ref;
-  final User _user;
+  final UserDto _user;
 
   EditProfileNotifier(this._ref, this._user) : super(EditProfileState(
     name: _user.name,
     description: _user.description,
     tag: _user.userTag,
     isPrivate: _user.isPrivate,
-    avatarUrl: _user.avatarUrl,
-    backgroundUrl: _user.backgroundUrl,
+    avatarUrl: _user.avatar?.url,
+    backgroundUrl: _user.background?.url,
   ));
 
   void nameChanged(String newName) {
@@ -47,12 +47,12 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
     state = state.copyWith(isPrivate: isPrivate); 
   }
 
-  void setAvatar(PickAndCropImageResult pickedAvatarImageData) {
+  void setAvatar(MemoryNamedImage pickedAvatarImageData) {
     state.newAvatarData = pickedAvatarImageData;
     state = state.copyWith();
   }
 
-  void setBackground(PickAndCropImageResult pickedBackgroundImageData) {
+  void setBackground(MemoryNamedImage pickedBackgroundImageData) {
     state.newBackgroundData = pickedBackgroundImageData;
     state = state.copyWith();
   }
@@ -128,7 +128,7 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
 
         state = state.copyWith(saveState: EditProfileSaveState.saved);
       } on DioError catch (e) {
-        if (e.type == DioErrorType.response) {
+        if (e.type == DioErrorType.badResponse) {
           final response = e.response!;
           if (response.statusCode == StatusCodes.incorrectInput &&
               response.data['message'] == 'Извините, данный тег занят') {

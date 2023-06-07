@@ -48,7 +48,7 @@ class TokenRepository {
 
       return newAccessToken;
     } on DioError catch (e) {
-      if (e.type == DioErrorType.response) {
+      if (e.type == DioErrorType.badResponse) {
         final response = e.response!;
         if (response.statusCode == StatusCodes.unauthorized) {
           // TODO: Выводить сообщение о том, что время предыдущей сесси истекло

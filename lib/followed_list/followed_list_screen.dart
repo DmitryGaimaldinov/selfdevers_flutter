@@ -4,7 +4,7 @@ import 'package:selfdevers/followed_list/followed_list_state.dart';
 import 'package:selfdevers/profile/screens/profile_screen.dart';
 
 import '../profile/user.dart';
-import '../profile/widgets/user_circle_avatar.dart';
+import '../profile/widgets/user_avatar.dart';
 import 'followed_list_notifier.dart';
 
 class FollowedListScreen extends StatelessWidget {
@@ -71,7 +71,7 @@ class _FollowedUserTile extends StatelessWidget {
         ));
       },
       // Сделать какой-нибудь UserAvatar
-      leading: CircleUserAvatar(
+      leading: UserAvatar(
         imageProvider: (user.avatarUrl != null)
             ? NetworkImage(user.avatarUrl!)
             : null,

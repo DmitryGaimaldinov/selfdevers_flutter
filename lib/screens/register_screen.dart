@@ -1,13 +1,18 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:neon_widgets/neon_widgets.dart';
 import 'package:selfdevers/auth/auth_notifier.dart';
 import 'package:selfdevers/auth/exceptions/auth_exception.dart';
 import 'package:selfdevers/styles/text_styles.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:selfdevers/widgets/login/login_button.dart';
 import 'package:selfdevers/widgets/login/login_title_text.dart';
+import 'package:selfdevers/widgets/neon_icon_button.dart';
+import 'package:selfdevers/widgets/neon_outlined_button.dart';
 
 import '../widgets/login/login_email_text_field.dart';
 import '../widgets/login/login_footer_text.dart';
@@ -95,7 +100,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
     ref.read(nameErrorTextProvider.notifier).state = nameErrorText;
 
-
     // Валидно ли введён email
     final email = ref.read(emailInputProvider).trim();
     String? emailErrorText;
@@ -103,7 +107,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       emailErrorText = 'Введите корректный email';
     }
     ref.read(emailErrorTextProvider.notifier).state = emailErrorText;
-
 
     // Валидно ли введён пароль
     final password = ref.read(passwordInputProvider).trim();
@@ -121,12 +124,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         emailErrorText == null) {
 
       try {
-        // TODO: Сохранять access и refresh токены.
-        // Изменить значение authProvider'ов.
-        await ref.read(authNotifierProvider.notifier).register(
+        await ref.read(authStateProvider.notifier).register(
             name: name,
             email: email,
             password: password);
+
+        Navigator.pop(context);
       } on AuthException catch (e) {
         if (e == AuthException.emailAlreadyTaken) {
           ref.read(emailErrorTextProvider.notifier).state = e.message;
@@ -139,77 +142,109 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final theme = Theme.of(context);
+    final backgroundColor = theme.colorScheme.surface.withOpacity(0.3);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: backgroundColor,
-          statusBarIconBrightness: Brightness.dark,
-        ),
-        toolbarHeight: 0.0,
-        elevation: 0.0,
-      ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 112),
-                      child: LoginTitleText('Станьте частью сообщества саморазвиванцев'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 56),
-                      child: Column(
-                        children: [
-                          _NameTextField(controller: _nameController),
-                          SizedBox(height: 16),
-                          Consumer(
-                            builder: (_, ref, __) {
-                              return EmailTextField(
-                                controller: _emailController,
-                                errorText: ref.watch(emailErrorTextProvider),
-                              );
-                            },
-                          ),
-                          SizedBox(height: 16),
-                          Consumer(
-                            builder: (_, ref, __) {
-                              return PasswordTextField(
-                                controller: _passwordController,
-                                errorText: ref.watch(passwordErrorTextProvider),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 32),
-                    LoginButton(
-                      onPressed: _submitRegister,
-                      child: const Text('Зарегестрироваться'),
-                    ),
-                    Spacer(),
-                    SizedBox(height: 48),
-                    LoginFooter(
-                      noActionText: 'Уже имеете аккаунт?',
-                      actionText: 'Войти',
-                      onActionTextTap: () {
-                        ref.read(loginStateProvider.notifier).state = LoginState.login;
-                      },
-                    )
-                  ],
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomCenter,
+                  colors: [theme.colorScheme.surface.withOpacity(0.8), theme.colorScheme.surface.withOpacity(0.3)]
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          Positioned.fill(
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0.0,
+                  pinned: true,
+                  leading: NeonIconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.close),
+                  ),
+                ),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: Column(
+                        children: [
+                          Spacer(),
+                          // NeonText(
+                          //   text: 'Станьте частью сообщества саморазвиванцев',
+                          //   textAlign: TextAlign.center,
+                          //   textSize: 24,
+                          //   fontWeight: FontWeight.w800,
+                          //   spreadColor: Colors.white,
+                          // ),
+                          LoginTitleText('Станьте частью сообщества саморазвиванцев'),
+                          Spacer(flex: 2),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 28),
+                            child: Column(
+                              children: [
+                                _NameTextField(controller: _nameController),
+                                SizedBox(height: 16),
+                                Consumer(
+                                  builder: (_, ref, __) {
+                                    return EmailTextField(
+                                      controller: _emailController,
+                                      errorText: ref.watch(emailErrorTextProvider),
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 16),
+                                Consumer(
+                                  builder: (_, ref, __) {
+                                    return PasswordTextField(
+                                      controller: _passwordController,
+                                      errorText: ref.watch(passwordErrorTextProvider),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 32),
+                          NeonOutlinedButton(
+                            onPressed: _submitRegister,
+                            child: Text('Зарегестрироваться'),
+                          ),
+                          // LoginButton(
+                          //   onPressed: _submitRegister,
+                          //   child: const Text('Зарегестрироваться'),
+                          // ),
+                          Spacer(),
+                          LoginFooter(
+                            noActionText: 'Уже имеете аккаунт?',
+                            actionText: 'Войти',
+                            onActionTextTap: () {
+                              ref.read(loginStateProvider.notifier).state = LoginState.login;
+                            },
+                          ),
+                          SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

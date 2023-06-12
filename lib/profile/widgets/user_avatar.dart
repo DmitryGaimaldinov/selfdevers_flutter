@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:selfdevers/api/photos/dtos/image_dto.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UserAvatar extends StatelessWidget {
   final ImageProvider? imageProvider;
@@ -15,12 +17,30 @@ class UserAvatar extends StatelessWidget {
     Key? key,
     this.imageProvider,
     this.showPlaceholder = true,
-    this.radius = 20,
+    double? radius,
     this.blurhash,
     this.placeholderColor,
     this.backgroundColor,
     this.onTap,
-  }) : super(key: key);
+  }) : this.radius = radius ?? 20, super(key: key);
+
+  /// Используется, когда нужно отобразить фотографию пользователя,
+  /// полученного с сети. Если у пользователя нет фотографии, показывается
+  /// стандартный placeholder.
+  factory UserAvatar.network(
+    ImageDto? imageDto,
+    {
+      double? radius,
+      VoidCallback? onTap,
+    }
+  ) {
+    return UserAvatar(
+      blurhash: imageDto?.blurhash,
+      imageProvider: (imageDto != null) ? CachedNetworkImageProvider(imageDto.url) : null,
+      radius: radius,
+      onTap: onTap,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +86,12 @@ class UserAvatar extends StatelessWidget {
         width: radius * 2,
         height: radius * 2,
         decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          // shape: BoxShape.circle,
-          color: theme.colorScheme.primary,
-          image: (imageProvider != null)
-              ? DecorationImage(image: imageProvider!)
-              : null
-        ),
+            borderRadius: borderRadius,
+            // shape: BoxShape.circle,
+            color: theme.colorScheme.primary,
+            image: (imageProvider != null)
+                ? DecorationImage(image: imageProvider!)
+                : null),
         child: (blurhash != null)
             ? BlurHash(hash: blurhash!)
             : showPlaceholder
@@ -86,9 +105,9 @@ class UserAvatar extends StatelessWidget {
     );
   }
 
-    // return CircleAvatar(
-    //   radius: radius,
-    //   backgroundImage: imageProvider,
-    //   backgroundColor: Colors.grey,
-    // );
+  // return CircleAvatar(
+  //   radius: radius,
+  //   backgroundImage: imageProvider,
+  //   backgroundColor: Colors.grey,
+  // );
 }

@@ -21,11 +21,10 @@ NotificationDto _$NotificationDtoFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$NotificationDto {
   int get id => throw _privateConstructorUsedError;
-  NotificationType get notificationType => throw _privateConstructorUsedError;
   DateTime get date =>
       throw _privateConstructorUsedError; // ignore: invalid_annotation_target
   @JsonKey(fromJson: NotificationDto.mapContent)
-  Object get content => throw _privateConstructorUsedError;
+  NotificationContentDto get content => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -41,9 +40,9 @@ abstract class $NotificationDtoCopyWith<$Res> {
   @useResult
   $Res call(
       {int id,
-      NotificationType notificationType,
       DateTime date,
-      @JsonKey(fromJson: NotificationDto.mapContent) Object content});
+      @JsonKey(fromJson: NotificationDto.mapContent)
+          NotificationContentDto content});
 }
 
 /// @nodoc
@@ -60,7 +59,6 @@ class _$NotificationDtoCopyWithImpl<$Res, $Val extends NotificationDto>
   @override
   $Res call({
     Object? id = null,
-    Object? notificationType = null,
     Object? date = null,
     Object? content = null,
   }) {
@@ -69,15 +67,14 @@ class _$NotificationDtoCopyWithImpl<$Res, $Val extends NotificationDto>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      notificationType: null == notificationType
-          ? _value.notificationType
-          : notificationType // ignore: cast_nullable_to_non_nullable
-              as NotificationType,
       date: null == date
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      content: null == content ? _value.content : content,
+      content: null == content
+          ? _value.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as NotificationContentDto,
     ) as $Val);
   }
 }
@@ -92,9 +89,9 @@ abstract class _$$_NotificationDtoCopyWith<$Res>
   @useResult
   $Res call(
       {int id,
-      NotificationType notificationType,
       DateTime date,
-      @JsonKey(fromJson: NotificationDto.mapContent) Object content});
+      @JsonKey(fromJson: NotificationDto.mapContent)
+          NotificationContentDto content});
 }
 
 /// @nodoc
@@ -109,7 +106,6 @@ class __$$_NotificationDtoCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? notificationType = null,
     Object? date = null,
     Object? content = null,
   }) {
@@ -118,15 +114,14 @@ class __$$_NotificationDtoCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
-      notificationType: null == notificationType
-          ? _value.notificationType
-          : notificationType // ignore: cast_nullable_to_non_nullable
-              as NotificationType,
       date: null == date
           ? _value.date
           : date // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      content: null == content ? _value.content : content,
+      content: null == content
+          ? _value.content
+          : content // ignore: cast_nullable_to_non_nullable
+              as NotificationContentDto,
     ));
   }
 }
@@ -136,7 +131,6 @@ class __$$_NotificationDtoCopyWithImpl<$Res>
 class _$_NotificationDto implements _NotificationDto {
   _$_NotificationDto(
       {required this.id,
-      required this.notificationType,
       required this.date,
       @JsonKey(fromJson: NotificationDto.mapContent) required this.content});
 
@@ -146,17 +140,15 @@ class _$_NotificationDto implements _NotificationDto {
   @override
   final int id;
   @override
-  final NotificationType notificationType;
-  @override
   final DateTime date;
 // ignore: invalid_annotation_target
   @override
   @JsonKey(fromJson: NotificationDto.mapContent)
-  final Object content;
+  final NotificationContentDto content;
 
   @override
   String toString() {
-    return 'NotificationDto(id: $id, notificationType: $notificationType, date: $date, content: $content)';
+    return 'NotificationDto(id: $id, date: $date, content: $content)';
   }
 
   @override
@@ -165,16 +157,13 @@ class _$_NotificationDto implements _NotificationDto {
         (other.runtimeType == runtimeType &&
             other is _$_NotificationDto &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.notificationType, notificationType) ||
-                other.notificationType == notificationType) &&
             (identical(other.date, date) || other.date == date) &&
-            const DeepCollectionEquality().equals(other.content, content));
+            (identical(other.content, content) || other.content == content));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, notificationType, date,
-      const DeepCollectionEquality().hash(content));
+  int get hashCode => Object.hash(runtimeType, id, date, content);
 
   @JsonKey(ignore: true)
   @override
@@ -193,10 +182,9 @@ class _$_NotificationDto implements _NotificationDto {
 abstract class _NotificationDto implements NotificationDto {
   factory _NotificationDto(
       {required final int id,
-      required final NotificationType notificationType,
       required final DateTime date,
       @JsonKey(fromJson: NotificationDto.mapContent)
-          required final Object content}) = _$_NotificationDto;
+          required final NotificationContentDto content}) = _$_NotificationDto;
 
   factory _NotificationDto.fromJson(Map<String, dynamic> json) =
       _$_NotificationDto.fromJson;
@@ -204,12 +192,10 @@ abstract class _NotificationDto implements NotificationDto {
   @override
   int get id;
   @override
-  NotificationType get notificationType;
-  @override
   DateTime get date;
   @override // ignore: invalid_annotation_target
   @JsonKey(fromJson: NotificationDto.mapContent)
-  Object get content;
+  NotificationContentDto get content;
   @override
   @JsonKey(ignore: true)
   _$$_NotificationDtoCopyWith<_$_NotificationDto> get copyWith =>

@@ -8,7 +8,7 @@ import 'package:selfdevers/feed/widgets/note_tile.dart';
 import 'package:selfdevers/main.dart';
 import 'package:selfdevers/profile/user.dart';
 import 'package:selfdevers/profile/widgets/user_avatar.dart';
-import 'package:selfdevers/screens/home_screen.dart';
+import 'package:selfdevers/home/home_screen.dart';
 import 'package:selfdevers/widgets/club_avatar.dart';
 import 'package:selfdevers/widgets/sliver_app_bar_delegate.dart';
 import 'package:rxdart/rxdart.dart';
@@ -48,10 +48,10 @@ class _SearchScreenState extends State<SearchScreen>
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           leading: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: appBarContentHeight,
-              ),
-              child: GestureDetector(
+            constraints: BoxConstraints(
+              maxHeight: appBarContentHeight,
+            ),
+            child: GestureDetector(
                 onTap: () {
                   showSearch(
                     context: context,
@@ -66,7 +66,7 @@ class _SearchScreenState extends State<SearchScreen>
                   );
                 },
                 child: _buildLeadingAvatar()
-              ),
+            ),
           ),
           title: Container(
             constraints: BoxConstraints(
@@ -92,13 +92,13 @@ class _SearchScreenState extends State<SearchScreen>
         body: Column(
           children: [
             Consumer(
-              builder: (context, ref, _) {
-                final isRequesting = ref.watch(isSearchRequestingProvider);
+                builder: (context, ref, _) {
+                  final isRequesting = ref.watch(isSearchRequestingProvider);
 
-                return isRequesting
-                    ? const LinearProgressIndicator()
-                    : const SizedBox();
-              }
+                  return isRequesting
+                      ? const LinearProgressIndicator()
+                      : const SizedBox();
+                }
             ),
             Expanded(
               child: TabBarView(
@@ -172,8 +172,8 @@ class _SearchScreenState extends State<SearchScreen>
 
   Widget _buildLeadingAvatar() {
     return Padding(
-      padding: const EdgeInsets.all(12),
-      child: UserAvatar()
+        padding: const EdgeInsets.all(12),
+        child: UserAvatar()
     );
   }
 
@@ -208,8 +208,8 @@ class _SearchScreenState extends State<SearchScreen>
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.secondary)
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: theme.colorScheme.secondary)
       ),
       child: Center(
         child: TextField(
@@ -348,8 +348,8 @@ class _SearchNotesFilterButtonState extends ConsumerState<_SearchNotesFilterButt
                     Text(
                       'Показывать',
                       style: TextStyle(
-                        color: theme.colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold
                       ),
                     ),
                     SizedBox(height: 8),
@@ -410,45 +410,45 @@ class _SearchNotesFilterButtonState extends ConsumerState<_SearchNotesFilterButt
     final filterPeriod = ref.watch(_filterNotesPeriodProvider);
 
     return Wrap(
-      runSpacing: 8,
-      spacing: 8,
-      children: [
-        _SearchFilterChip(
-          onTap: () {
-            _changeFilterPeriod(_FilterNotesPeriod.day);
-          },
-          label: 'Сутки',
-          selected: filterPeriod == _FilterNotesPeriod.day,
-        ),
-        _SearchFilterChip(
-          onTap: () {
-            _changeFilterPeriod(_FilterNotesPeriod.week);
-          },
-          label: 'Неделя',
-          selected: filterPeriod == _FilterNotesPeriod.week,
-        ),
-        _SearchFilterChip(
-          onTap: () {
-            _changeFilterPeriod(_FilterNotesPeriod.month);
-          },
-          label: 'Месяц',
-          selected: filterPeriod == _FilterNotesPeriod.month,
-        ),
-        _SearchFilterChip(
-          onTap: () {
-            _changeFilterPeriod(_FilterNotesPeriod.year);
-          },
-          label: 'Год',
-          selected: filterPeriod == _FilterNotesPeriod.year,
-        ),
-        _SearchFilterChip(
-          onTap: () {
-            _changeFilterPeriod(_FilterNotesPeriod.allTime);
-          },
-          label: 'Всё время',
-          selected: filterPeriod == _FilterNotesPeriod.allTime,
-        ),
-      ]
+        runSpacing: 8,
+        spacing: 8,
+        children: [
+          _SearchFilterChip(
+            onTap: () {
+              _changeFilterPeriod(_FilterNotesPeriod.day);
+            },
+            label: 'Сутки',
+            selected: filterPeriod == _FilterNotesPeriod.day,
+          ),
+          _SearchFilterChip(
+            onTap: () {
+              _changeFilterPeriod(_FilterNotesPeriod.week);
+            },
+            label: 'Неделя',
+            selected: filterPeriod == _FilterNotesPeriod.week,
+          ),
+          _SearchFilterChip(
+            onTap: () {
+              _changeFilterPeriod(_FilterNotesPeriod.month);
+            },
+            label: 'Месяц',
+            selected: filterPeriod == _FilterNotesPeriod.month,
+          ),
+          _SearchFilterChip(
+            onTap: () {
+              _changeFilterPeriod(_FilterNotesPeriod.year);
+            },
+            label: 'Год',
+            selected: filterPeriod == _FilterNotesPeriod.year,
+          ),
+          _SearchFilterChip(
+            onTap: () {
+              _changeFilterPeriod(_FilterNotesPeriod.allTime);
+            },
+            label: 'Всё время',
+            selected: filterPeriod == _FilterNotesPeriod.allTime,
+          ),
+        ]
     );
   }
 }
@@ -513,10 +513,10 @@ class MySearchDelegate extends SearchDelegate {
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
-      onPressed: () {
-        close(context, null);
-      },
-      icon: Icon(Icons.arrow_back)
+        onPressed: () {
+          close(context, null);
+        },
+        icon: Icon(Icons.arrow_back)
     );
   }
 
@@ -534,26 +534,26 @@ class MySearchDelegate extends SearchDelegate {
     print('build suggestions for query: $query');
 
     return ListView.builder(
-      itemCount: 20,
-      itemBuilder: (context, index) {
-        return _SuggestionTile(
-          onTap: () {},
-          leading: UserAvatar(),
-          titleLabel: 'Суперюзер $index',
-          subtitleLabel: '$index читателей',
-        );
-      }
+        itemCount: 20,
+        itemBuilder: (context, index) {
+          return _SuggestionTile(
+            onTap: () {},
+            leading: UserAvatar(),
+            titleLabel: 'Суперюзер $index',
+            subtitleLabel: '$index читателей',
+          );
+        }
     );
 
     if (query.trim().isNotEmpty) {
       Stream.value(query)
           .debounceTime(Duration(milliseconds: 300))
           .switchMap((value) async* {
-            yield [];
-          })
+        yield [];
+      })
           .listen((event) {
 
-          });
+      });
     }
 
     return SizedBox();
@@ -645,5 +645,3 @@ class _ChallengeSuggestionTile extends StatelessWidget {
     return Container();
   }
 }
-
-

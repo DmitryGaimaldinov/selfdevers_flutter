@@ -12,12 +12,14 @@ import 'package:selfdevers/edit_profile/edit_profile_screen.dart';
 import 'package:selfdevers/profile/related_user_fields.dart';
 import 'package:selfdevers/profile/user_counter.dart';
 import 'package:selfdevers/widgets/linked_text.dart';
+import 'package:selfdevers/widgets/show_adaptive_dialog.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 
 import '../../feed/note.dart';
 import '../../feed/widgets/note_tile.dart';
 import '../../followed_list/followed_list_screen.dart';
 import '../../widgets/my_divider.dart';
+import '../../widgets/neon_outlined_button.dart';
 import '../user.dart';
 import '../../styles/text_styles.dart';
 import '../widgets/background_profile_image.dart';
@@ -25,10 +27,12 @@ import '../widgets/avatar_profile_image.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final String userTag;
+  final UserDto? userDto;
 
   const ProfileScreen({
     Key? key,
     required this.userTag,
+    this.userDto,
   }) : super(key: key);
 
   @override
@@ -43,7 +47,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+
+    if (widget.userDto != null) {
+      _profileNotifier.setUserData(widget.userDto!);
+    } else {
+      _profileNotifier.loadUser();
+    }
   }
+
+  ProfileNotifier get _profileNotifier => ref.read(profileStateProvider(widget.userTag).notifier);
 
   @override
   void dispose() {
@@ -53,7 +65,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profileState = ref.watch(profileNotifierProvider(widget.userTag));
+    final profileState = ref.watch(profileStateProvider(widget.userTag));
 
     if (profileState is ProfileStateLoading) {
       return Center(
@@ -66,8 +78,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     } else if (profileState is ProfileStateLoaded) {
       final user = profileState.userDto;
-
-      // final relatedFields = profileState.userDto.relatedUserFields;
 
       return Scaffold(
         appBar: AppBar(
@@ -98,6 +108,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     height: totalHeaderHeight,
                                     color: Colors.transparent,
                                   ),
+                                  // TODO: Сделать blurhash
                                   BackgroundProfileImage(
                                     height: backgroundHeight,
                                     imageProvider: (user.background != null)
@@ -107,6 +118,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   Positioned(
                                     left: 16,
                                     bottom: 0,
+                                    // TODO: Сделать blurhash
                                     child: AvatarProfileImage(
                                       imageProvider: (user.avatar != null)
                                           ? NetworkImage(user.avatar!.url)
@@ -122,6 +134,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                 ],
                               ),
+                              SizedBox(height: 8),
                               Container(
                                   color: Theme.of(context).colorScheme.surface,
                                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -282,212 +295,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
 
     throw 'Нет экрана для profileState: $profileState';
-
-
-
-    // return Scaffold(
-    //   body: DefaultTabController(
-    //     length: 2,
-    //     child: NestedScrollView(
-    //       controller: _scrollController,
-    //       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-    //         print(innerBoxIsScrolled);
-    //         return <Widget>[
-    //           SliverAppBar.large(
-    //             // expandedHeight: 400,
-    //             floating: false,
-    //             pinned: true,
-    //             title: Opacity(
-    //               opacity: _titleOpacity,
-    //               child: Text(
-    //                 widget.user.name,
-    //                 style: TextStyle(
-    //                   color: Colors.white,
-    //                   fontSize: 16.0,
-    //                 )),
-    //             ),
-    //             flexibleSpace: FlexibleSpaceBar(
-    //               stretchModes: [StretchMode.blurBackground],
-    //               background: Column(
-    //                 mainAxisSize: MainAxisSize.min,
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 children: [
-    //                   Stack(
-    //                     children: [
-    //                       Container(
-    //                         height: 200,
-    //                         color: Colors.transparent,
-    //                       ),
-    //                       Container(
-    //                         height: 160,
-    //                         color: Colors.grey,
-    //                       ),
-    //                       Positioned(
-    //                         left: 16,
-    //                         bottom: 0,
-    //                         child: _AvatarImage(radius: 40),
-    //                       )
-    //                     ],
-    //                   ),
-    //                   Padding(
-    //                     padding: const EdgeInsets.symmetric(horizontal: 16),
-    //                     child: Column(
-    //                       mainAxisSize: MainAxisSize.min,
-    //                       crossAxisAlignment: CrossAxisAlignment.start,
-    //                       children: [
-    //                         Text(
-    //                           widget.user.name,
-    //                           style: Theme.of(context).textTheme.titleLarge,
-    //                         ),
-    //                         Text(
-    //                           '@${widget.user.userTag}',
-    //                           style: TextStyles.light1,
-    //                         ),
-    //                         widget.user.description.isEmpty
-    //                             ? SizedBox()
-    //                             : Padding(
-    //                             padding: const EdgeInsets.only(top: 16),
-    //                             child: Text(widget.user.description)),
-    //                         SizedBox(height: 16),
-    //                         Row(
-    //                           children: [
-    //                             Icon(Icons.calendar_today),
-    //                             SizedBox(width: 4),
-    //                             Text(
-    //                                 widget.user.registerDate,
-    //                                 style: TextStyles.light2
-    //                             ),
-    //                           ],
-    //                         ),
-    //                         SizedBox(height: 16),
-    //                         // TODO: Вынести в отдельный виджет FollowingsCountText and FollowersCountText
-    //                         Wrap(
-    //                           crossAxisAlignment: WrapCrossAlignment.center,
-    //                           children: [
-    //                             Text('1', style: TextStyle(fontWeight: FontWeight.bold)),
-    //                             SizedBox(width: 4),
-    //                             Text('читаемых'),
-    //                             SizedBox(width: 8),
-    //                             Text('1', style: TextStyle(fontWeight: FontWeight.bold)),
-    //                             SizedBox(width: 4),
-    //                             Text('читателей'),
-    //                           ],
-    //                         ),
-    //                       ],
-    //                     )
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //             bottom: TabBar(
-    //                 tabs: [
-    //                   Tab(text: 'Посты'),
-    //                   Tab(text: 'Ответы'),
-    //                 ]
-    //             ),
-    //           ),
-    //           // SliverPersistentHeader(
-    //           //   delegate: _SliverAppBarDelegate(
-    //           //     TabBar(
-    //           //       tabs: [
-    //           //         Tab(text: 'Посты'),
-    //           //         Tab(text: 'Ответы'),
-    //           //       ]
-    //           //     ),
-    //           //     user: widget.user,
-    //           //   ),
-    //           //   pinned: true,
-    //           // ),
-    //         ];
-    //       },
-    //       body: Center(
-    //         child: Text("Sample text"),
-    //       ),
-    //     ),
-    //   ),
-    // );
-
-    // return Scaffold(
-    //   extendBodyBehindAppBar: true,
-    //   appBar: AppBar(
-    //     backgroundColor: Colors.transparent,
-    //   ),
-    //   body: SingleChildScrollView(
-    //     child: Column(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         Stack(
-    //           children: [
-    //             Container(
-    //               height: 170,
-    //               color: Colors.transparent,
-    //             ),
-    //             Positioned(
-    //               child: _BackgroundImage()
-    //             ),
-    //             Positioned(
-    //               left: 16,
-    //               bottom: 0,
-    //               child: _AvatarImage(),
-    //             )
-    //           ],
-    //         ),
-    //         Padding(
-    //           padding: const EdgeInsets.symmetric(horizontal: 16),
-    //           child: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               Text(
-    //                 user.name,
-    //                 style: Theme.of(context).textTheme.titleLarge,
-    //               ),
-    //               Text(
-    //                 '@${user.userTag}',
-    //                 style: TextStyles.light1,
-    //               ),
-    //               user.description.isEmpty
-    //                   ? SizedBox()
-    //                   : Padding(
-    //                       padding: const EdgeInsets.only(top: 16),
-    //                       child: Text(user.description)),
-    //               SizedBox(height: 16),
-    //               Row(
-    //                 children: [
-    //                   Icon(Icons.calendar_today),
-    //                   SizedBox(width: 4),
-    //                   Text(
-    //                     user.registerDate,
-    //                     style: TextStyles.light2
-    //                   ),
-    //                 ],
-    //               ),
-    //               SizedBox(height: 16),
-    //               // TODO: Вынести в отдельный виджет FollowingsCountText and FollowersCountText
-    //               Wrap(
-    //                 crossAxisAlignment: WrapCrossAlignment.center,
-    //                 children: [
-    //                   Text('1', style: TextStyle(fontWeight: FontWeight.bold)),
-    //                   SizedBox(width: 4),
-    //                   Text('читаемых'),
-    //                   SizedBox(width: 8),
-    //                   Text('1', style: TextStyle(fontWeight: FontWeight.bold)),
-    //                   SizedBox(width: 4),
-    //                   Text('читателей'),
-    //                 ],
-    //               ),
-    //               TabBar(
-    //                 tabs: [
-    //                   Tab(text: 'Посты'),
-    //                   Tab(text: 'Ответы'),
-    //                 ]
-    //               ),
-    //             ],
-    //           )
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }
 
@@ -502,14 +309,15 @@ class ProfileActionButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currUserId = ref.watch(currentUserProvider);
+    final theme = Theme.of(context);
 
     if (currUserId == null) {
       return _FollowButton(
-          label: 'Войдите, чтобы подписаться',
-          onPressed: () {
-            throw 'Сделать реализацию "Войти чтобы подписаться". '
-                'Вызывать какой-то метод показа диалога для входа';
-          }
+        label: 'Войдите, чтобы подписаться',
+        onPressed: () {
+          throw 'Сделать реализацию "Войти чтобы подписаться". '
+              'Вызывать какой-то метод показа диалога для входа';
+        }
       );
     }
 
@@ -517,9 +325,7 @@ class ProfileActionButton extends ConsumerWidget {
       return _FollowButton(
         label: 'Изменить профиль',
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => EditProfileScreen(user: userDto),
-          ));
+          showAdaptiveDialog(context: context, screen: EditProfileScreen(user: userDto));
         },
       );
     }
@@ -529,7 +335,7 @@ class ProfileActionButton extends ConsumerWidget {
         return _FollowButton(
           label: userDto.isPrivate ? 'Отправить запрос' : 'Подписаться',
           onPressed: () {
-            ref.read(profileNotifierProvider(userDto.userTag).notifier)
+            ref.read(profileStateProvider(userDto.userTag).notifier)
                 .follow(userDto.id);
           },
         );
@@ -537,17 +343,19 @@ class ProfileActionButton extends ConsumerWidget {
         return _FollowButton(
           label: 'Отозвать запрос',
           onPressed: () {
-            ref.read(profileNotifierProvider(userDto.userTag).notifier)
+            ref.read(profileStateProvider(userDto.userTag).notifier)
                 .unfollow(userDto.id);
           },
+          neonColor: theme.colorScheme.error,
         );
       case FollowStateDto.following:
         return _FollowButton(
           label: 'Отписаться',
           onPressed: () {
-            ref.read(profileNotifierProvider(userDto.userTag).notifier)
+            ref.read(profileStateProvider(userDto.userTag).notifier)
                 .unfollow(userDto.id);
           },
+          neonColor: theme.colorScheme.error
         );
     }
   }
@@ -556,18 +364,21 @@ class ProfileActionButton extends ConsumerWidget {
 class _FollowButton extends StatelessWidget {
   final String label;
   final void Function() onPressed;
+  final Color? neonColor;
 
   const _FollowButton({
     Key? key,
     required this.label,
     required this.onPressed,
+    this.neonColor,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return NeonOutlinedButton(
       onPressed: onPressed,
       child: Text(label),
+      neonColor: neonColor,
     );
   }
 }

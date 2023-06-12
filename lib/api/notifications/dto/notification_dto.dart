@@ -2,31 +2,43 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:selfdevers/api/notifications/dto/follow_notification_content_dto.dart';
 import 'package:selfdevers/api/notifications/dto/follow_request_notification_content_dto.dart';
 
+import 'notification_type.dart';
+
 part 'notification_dto.freezed.dart';
 part 'notification_dto.g.dart';
 
-@JsonEnum(alwaysCreate: true)
-enum NotificationType {
-  follow,
-  followRequest,
+@JsonSerializable()
+class NotificationContentDto {
+  final NotificationType notificationType;
+
+  NotificationContentDto({required this.notificationType});
+
+  factory NotificationContentDto.fromJson(Map<String, dynamic> json) => _$NotificationContentDtoFromJson(json);
+  Map<String, dynamic> toJson() => _$NotificationContentDtoToJson(this);
 }
 
 @freezed
+// TODO: Сделать NotificationDto через обычный класс.
+// Сгенерировать equals через alt + insert
 class NotificationDto with _$NotificationDto {
   factory NotificationDto({
     required int id,
-    required NotificationType notificationType,
     required DateTime date,
     // ignore: invalid_annotation_target
-    @JsonKey(fromJson: NotificationDto.mapContent) required Object content,
+    @JsonKey(fromJson: NotificationDto.mapContent) required NotificationContentDto content,
   }) = _NotificationDto;
 
-  static Object mapContent(Map<String, dynamic> value)  {
-    if (value['notificationType'] == 'follow') {
-      FollowNotificationContentDto.fromJson(value['content']);
-    }
+  static NotificationContentDto mapContent(Map<String, dynamic> contentJson)  {
+    final notificationTypeString = contentJson['notificationType'];
 
-    return FollowRequestNotificationContentDto.fromJson(value['content']);
+    switch (notificationTypeString) {
+      case 'follow':
+        return FollowNotificationContentDto.fromJson(contentJson);
+      case 'followRequest':
+        return FollowRequestNotificationContentDto.fromJson(contentJson);
+      default:
+        throw 'Нет маппера для notificationType: $notificationTypeString';
+    }
   }
 
   factory NotificationDto.fromJson(Map<String, dynamic> json) => _$NotificationDtoFromJson(json);

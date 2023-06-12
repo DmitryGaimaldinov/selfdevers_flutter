@@ -11,10 +11,13 @@ import 'package:email_validator/email_validator.dart';
 import 'package:selfdevers/widgets/login/login_button.dart';
 import 'package:selfdevers/widgets/login/login_title_text.dart';
 
+import '../widgets/frosted_container.dart';
 import '../widgets/login/login_email_text_field.dart';
 import '../widgets/login/login_footer_text.dart';
 import '../widgets/login/login_password_text_field.dart';
 import '../widgets/login/login_text_field.dart';
+import '../widgets/neon_icon_button.dart';
+import '../widgets/neon_outlined_button.dart';
 
 // EMAIL
 final emailInputProvider = StateProvider<String>((ref) {
@@ -25,7 +28,6 @@ final emailErrorTextProvider = StateProvider<String?>((ref) {
   return null;
 });
 
-
 // PASSWORD
 final passwordErrorTextProvider = StateProvider<String?>((ref) {
   return null;
@@ -34,7 +36,6 @@ final passwordErrorTextProvider = StateProvider<String?>((ref) {
 final passwordInputProvider = StateProvider<String>((ref) {
   return '';
 });
-
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -58,7 +59,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     _passwordController = TextEditingController()
       ..addListener(() {
-        ref.read(passwordInputProvider.notifier).state = _passwordController.text;
+        ref.read(passwordInputProvider.notifier).state =
+            _passwordController.text;
       });
   }
 
@@ -70,7 +72,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submitLogin() async {
-
     // Валидно ли введён email
     final email = ref.read(emailInputProvider).trim();
     String? emailErrorText;
@@ -78,7 +79,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       emailErrorText = 'Введите корректный email';
     }
     ref.read(emailErrorTextProvider.notifier).state = emailErrorText;
-
 
     // Валидно ли введён пароль
     final password = ref.read(passwordInputProvider).trim();
@@ -95,9 +95,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       try {
         // TODO: Сохранять access и refresh токены.
         // Изменить значение authProvider'ов.
-        await ref.read(authStateProvider.notifier).login(
-            email: email,
-            password: password);
+        await ref
+            .read(authStateProvider.notifier)
+            .login(email: email, password: password);
 
         Navigator.pop(context);
       } on AuthException catch (e) {
@@ -114,71 +114,74 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Theme.of(context).colorScheme.surface;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: backgroundColor,
-          statusBarIconBrightness: Brightness.dark,
-        ),
-        // toolbarHeight: 0.0,
-        elevation: 0.0,
-      ),
-      body: SafeArea(
+      body: FrostedContainer(
         child: CustomScrollView(
           slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0.0,
+              pinned: true,
+              leading: NeonIconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.close),
+              ),
+            ),
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 112),
-                      child: LoginTitleText('Добро пожаловать, саморазвиванец'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 56),
-                      child: Column(
-                        children: [
-                          Consumer(
-                            builder: (_, ref, __) {
-                              return EmailTextField(
-                                controller: _emailController,
-                                errorText: ref.watch(emailErrorTextProvider),
-                              );
-                            },
-                          ),
-                          SizedBox(height: 16),
-                          Consumer(
-                            builder: (_, ref, __) {
-                              return PasswordTextField(
-                                controller: _passwordController,
-                                errorText: ref.watch(passwordErrorTextProvider),
-                              );
-                            },
-                          ),
-                        ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Column(
+                    children: [
+                      Spacer(),
+                      LoginTitleText('Добро пожаловать, саморазвиванец!'),
+                      Spacer(flex: 2),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        child: Column(
+                          children: [
+                            Consumer(
+                              builder: (_, ref, __) {
+                                return EmailTextField(
+                                  controller: _emailController,
+                                  errorText: ref.watch(emailErrorTextProvider),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            Consumer(
+                              builder: (_, ref, __) {
+                                return PasswordTextField(
+                                  controller: _passwordController,
+                                  errorText: ref.watch(passwordErrorTextProvider),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 32),
-                    LoginButton(
-                      onPressed: _submitLogin,
-                      child: const Text('Войти'),
-                    ),
-                    Spacer(),
-                    SizedBox(height: 48),
-                    LoginFooter(
-                      noActionText: 'Ещё не зарегестрированы?',
-                      actionText: 'Создать аккаунт',
-                      onActionTextTap: () {
-                        ref.read(loginStateProvider.notifier).state = LoginState.register;
-                      },
-                    )
-                  ],
+                      SizedBox(height: 32),
+                      NeonOutlinedButton(
+                        onPressed: _submitLogin,
+                        child: Text('Войти'),
+                      ),
+                      Spacer(),
+                      LoginFooter(
+                        noActionText: 'Ещё не зарегестрированы?',
+                        actionText: 'Создать аккаунт',
+                        onActionTextTap: () {
+                          ref.read(loginStateProvider.notifier).state = LoginState.register;
+                        },
+                      ),
+                      SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -187,6 +190,81 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
+  //
+  // @override
+  // Widget build(BuildContext context) {
+  //   final backgroundColor = Theme.of(context).colorScheme.surface;
+  //
+  //   return Scaffold(
+  //     backgroundColor: backgroundColor,
+  //     appBar: AppBar(
+  //       backgroundColor: backgroundColor,
+  //       systemOverlayStyle: SystemUiOverlayStyle(
+  //         statusBarColor: backgroundColor,
+  //         statusBarIconBrightness: Brightness.dark,
+  //       ),
+  //       // toolbarHeight: 0.0,
+  //       elevation: 0.0,
+  //     ),
+  //     body: SafeArea(
+  //       child: CustomScrollView(
+  //         slivers: [
+  //           SliverFillRemaining(
+  //             hasScrollBody: false,
+  //             child: Padding(
+  //               padding: const EdgeInsets.all(16.0),
+  //               child: Column(
+  //                 children: [
+  //                   const Padding(
+  //                     padding: EdgeInsets.symmetric(vertical: 112),
+  //                     child: LoginTitleText('Добро пожаловать, саморазвиванец'),
+  //                   ),
+  //                   Padding(
+  //                     padding: const EdgeInsets.symmetric(horizontal: 56),
+  //                     child: Column(
+  //                       children: [
+  //                         Consumer(
+  //                           builder: (_, ref, __) {
+  //                             return EmailTextField(
+  //                               controller: _emailController,
+  //                               errorText: ref.watch(emailErrorTextProvider),
+  //                             );
+  //                           },
+  //                         ),
+  //                         SizedBox(height: 16),
+  //                         Consumer(
+  //                           builder: (_, ref, __) {
+  //                             return PasswordTextField(
+  //                               controller: _passwordController,
+  //                               errorText: ref.watch(passwordErrorTextProvider),
+  //                             );
+  //                           },
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                   SizedBox(height: 32),
+  //                   LoginButton(
+  //                     onPressed: _submitLogin,
+  //                     child: const Text('Войти'),
+  //                   ),
+  //                   Spacer(),
+  //                   SizedBox(height: 48),
+  //                   LoginFooter(
+  //                     noActionText: 'Ещё не зарегестрированы?',
+  //                     actionText: 'Создать аккаунт',
+  //                     onActionTextTap: () {
+  //                       ref.read(loginStateProvider.notifier).state =
+  //                           LoginState.register;
+  //                     },
+  //                   )
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }
-
-

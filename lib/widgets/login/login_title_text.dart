@@ -14,7 +14,7 @@ class LoginTitleText extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: FontWeight.w800,
         ),
         textAlign: TextAlign.center,

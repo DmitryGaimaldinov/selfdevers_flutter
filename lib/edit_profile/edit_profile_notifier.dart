@@ -44,7 +44,7 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
   }
 
   void privacyChanged(bool isPrivate) {
-    state = state.copyWith(isPrivate: isPrivate); 
+    state = state.copyWith(isPrivate: isPrivate);
   }
 
   void setAvatar(MemoryNamedImage pickedAvatarImageData) {
@@ -89,8 +89,8 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
             ApiServices.updateAvatar,
             FormData.fromMap({
               'file': MultipartFile.fromBytes(
-                state.newAvatarData!.imageBytes,
-                filename: state.newAvatarData!.filename)
+                  state.newAvatarData!.imageBytes,
+                  filename: state.newAvatarData!.filename)
             }),
           );
         } else if (state.isAvatarDeleted) {
@@ -124,7 +124,7 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
 
         final user = User.fromJson(response.data);
 
-        _ref.read(profileNotifierProvider(user.userTag).notifier).loadUser();
+        _ref.read(profileStateProvider(user.userTag).notifier).loadUser();
 
         state = state.copyWith(saveState: EditProfileSaveState.saved);
       } on DioError catch (e) {

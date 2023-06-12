@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:selfdevers/api/notes/dto/note_dto.dart';
 import 'package:selfdevers/feed/widgets/note_button.dart';
@@ -38,9 +39,10 @@ class _NoteTileState extends State<NoteTile> {
   }
 
   void _goToProfile() {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => ProfileScreen(userTag: widget.note.creator.userTag),
-    ));
+    context.push('/profile/${widget.note.creator.userTag}');
+    // Navigator.of(context).push(MaterialPageRoute(
+    //     builder: (_) => ProfileScreen(userTag: widget.note.creator.userTag),
+    // ));
   }
 
   @override

@@ -1,16 +1,33 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:selfdevers/api/api.dart';
 import 'package:selfdevers/auth/auth_notifier.dart';
 import 'package:selfdevers/auth/auth_state.dart';
 import 'package:selfdevers/main.dart';
 import 'package:selfdevers/notifications/notifications_notifier.dart';
 import 'package:selfdevers/notifications/widgets/notification_tile.dart';
 import 'package:selfdevers/widgets/login/login_button.dart';
+import 'package:selfdevers/widgets/my_divider.dart';
+
 
 import '../auth/show_login_dialog.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +56,7 @@ class _NotificationsListView extends ConsumerWidget {
           return Center(child: Text('Уведомлений нет'));
         }
 
-        return ListView.builder(
+        return ListView.separated(
           itemCount: notifications.length,
           itemBuilder: (context, index) {
             final notification = notifications[index];
@@ -50,10 +67,17 @@ class _NotificationsListView extends ConsumerWidget {
                   ? false
                   : notification.date.isAfter(lastViewed),
             );
-          }
+          },
+          separatorBuilder: (context, index) {
+            return const MyDivider();
+          },
         );
       },
       notLoggedIn: () {
+        // return Center(
+        //   child: _buildCheckSocketButton(),
+        // );
+
         return Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -75,4 +99,17 @@ class _NotificationsListView extends ConsumerWidget {
       }
     );
   }
+
+  // Widget _buildCheckSocketButton() {
+  //   return FilledButton(
+  //     onPressed: () {
+  //
+  //       socket.onConnect((data) {
+  //         debugPrint('SOCKET CONNECTED. data: $data');
+  //       });
+  //
+  //     },
+  //     child: Text('SOCKET BITCH'),
+  //   );
+  // }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:selfdevers/main.dart';
-import 'package:selfdevers/screens/home_screen.dart';
+import 'package:selfdevers/home/home_screen.dart';
 import 'package:selfdevers/widgets/neon_floating_action_button.dart';
 import 'package:selfdevers/widgets/neon_hover_container.dart';
 

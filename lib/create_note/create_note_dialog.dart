@@ -221,7 +221,7 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
     final isSending = createNoteState.isSending;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      // backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: Text('Создание поста'),
         actions: [

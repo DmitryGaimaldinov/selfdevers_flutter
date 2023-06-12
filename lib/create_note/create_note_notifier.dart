@@ -33,7 +33,6 @@ class CreateNoteNotifier extends StateNotifier<CreateNoteState> {
 
   Future<void> send({required List<SendNoteDto> sendNoteDtos}) async {
     state = state.copyWith(isSending: true);
-
     int? parentId;
 
     for (final dto in sendNoteDtos) {

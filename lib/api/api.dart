@@ -43,6 +43,11 @@ class Api {
     return _dio.get(method);
   }
 
+  Future<Response<dynamic>> delete(String method,
+      [dynamic data, CancelToken? cancelToken]) async {
+    return _dio.delete(method, data: data, cancelToken: cancelToken);
+  }
+
   // Future<CancelToken> call<T, R, E>(
   //     ApiStrategy<T, R> apiMethodStrategy,
   //     void Function(R result) onSuccess,

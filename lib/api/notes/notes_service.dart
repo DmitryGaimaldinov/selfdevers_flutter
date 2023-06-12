@@ -16,7 +16,8 @@ class NotesService {
   Api get _api => _ref.read(apiProvider);
 
   /// Returns id of created note
-  Future<int> createNote(CreateNoteDto createNoteDto, { CancelToken? cancelToken }) async {
+  Future<int> createNote(CreateNoteDto createNoteDto,
+      {CancelToken? cancelToken}) async {
     final response = await _api.post(
       'notes/create-note',
       createNoteDto.toJson(),
@@ -29,5 +30,13 @@ class NotesService {
   Future<GetFeedPeopleResultDto> getFeedPeople() async {
     final response = await _api.post('notes/get-feed-people');
     return GetFeedPeopleResultDto.fromJson(response.data);
+  }
+
+  Future<void> like({ required int noteId }) async {
+    await _api.post('likes/like-note', { 'noteId': noteId });
+  }
+
+  Future<void> unlike({ required int noteId }) async {
+    await _api.delete('likes/delete-note-like', { 'noteId': noteId });
   }
 }

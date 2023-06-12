@@ -28,7 +28,7 @@ class AvatarProfileImage extends StatelessWidget {
 
     return CircleAvatar(
       radius: 40,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       child: UserAvatar(
         radius: 38,
         imageProvider: imageProvider,

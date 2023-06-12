@@ -1,16 +1,7 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:dio/dio.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:selfdevers/api/api_services.dart';
-import 'package:selfdevers/api/status_codes.dart';
 import 'package:selfdevers/auth/auth_notifier.dart';
-import 'package:selfdevers/auth/auth_state.dart';
 import 'package:selfdevers/repositories/token_repository.dart';
-
-import 'strategies/api_strategy.dart';
 
 const BASE_URL = 'http://127.0.0.1:3000/';
 
@@ -25,31 +16,30 @@ class Api {
 
   Api._(Ref ref) {
     _dio.interceptors
-        ..add(QueuedInterceptor())
-        ..add(InterceptorsWrapper(
-          onRequest: (reqOptions, handler) async {
-            final accessToken = await ref.read(tokenRepositoryProvider)
-                .loadAccessToken();
+      ..add(QueuedInterceptor())
+      ..add(InterceptorsWrapper(onRequest: (reqOptions, handler) async {
+        final accessToken = await TokenRepository().loadAccessToken();
 
-            if (accessToken == null) {
-              await ref.read(authStateProvider.notifier).logout();
-            } else {
-              print('Перед добавлением accessToken в req');
-              print('reqOptions.headers: ${reqOptions.headers}');
-              reqOptions.headers["Authorization"] = "Bearer $accessToken";
-              print('После добавления accessToken в req');
-              print('reqOptions.headers: ${reqOptions.headers}');
-            }
-            handler.next(reqOptions);
-          }
-        ));
+        if (accessToken == null) {
+          await ref.read(authStateProvider.notifier).logout();
+        } else {
+          print('Перед добавлением accessToken в req');
+          print('reqOptions.headers: ${reqOptions.headers}');
+          reqOptions.headers["Authorization"] = "Bearer $accessToken";
+          print('После добавления accessToken в req');
+          print('reqOptions.headers: ${reqOptions.headers}');
+        }
+        handler.next(reqOptions);
+      }));
   }
 
-  Future<Response<dynamic>> post(String method, [ dynamic data, CancelToken? cancelToken ]) async {
+  Future<Response<dynamic>> post(String method,
+      [dynamic data, CancelToken? cancelToken]) async {
     return _dio.post(method, data: data, cancelToken: cancelToken);
   }
 
-  Future<Response<dynamic>> get(String method, [dynamic data, CancelToken? cancelToken ]) async {
+  Future<Response<dynamic>> get(String method,
+      [dynamic data, CancelToken? cancelToken]) async {
     return _dio.get(method);
   }
 

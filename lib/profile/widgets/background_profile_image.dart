@@ -22,7 +22,7 @@ class BackgroundProfileImage extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).colorScheme.primary,
         image: (imageProvider == null)
             ? null
             : DecorationImage(

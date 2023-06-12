@@ -112,8 +112,10 @@ class EditProfileState {
 
     return false;
   }
+
   bool get canRestoreBackground {
-    if (backgroundUrl != null && (isBackgroundDeleted || newBackgroundData != null)) {
+    if (backgroundUrl != null &&
+        (isBackgroundDeleted || newBackgroundData != null)) {
       return true;
     }
 

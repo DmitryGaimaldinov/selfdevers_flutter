@@ -39,7 +39,11 @@ Future<T> showAdaptiveDialog<T>({
                   ),
                   child: ClipRRect(
                     borderRadius: isMobile ? BorderRadius.circular(0) : BorderRadius.circular(24),
-                    child: screen,
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                          scaffoldBackgroundColor: isMobile ? null : Colors.transparent),
+                      child: screen
+                    ),
                   ),
                 ),
               ),

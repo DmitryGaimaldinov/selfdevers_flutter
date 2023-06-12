@@ -5,11 +5,13 @@ import 'package:selfdevers/widgets/tap_scale.dart';
 class NeonOutlinedButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Widget child;
+  final Color? neonColor;
 
   const NeonOutlinedButton({
     Key? key,
     required this.onPressed,
     required this.child,
+    this.neonColor,
   }) : super(key: key);
 
   @override
@@ -22,7 +24,7 @@ class _NeonOutlinedButtonState extends State<NeonOutlinedButton> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final shadowColor = theme.colorScheme.primary;
+    final shadowColor = widget.neonColor ?? theme.colorScheme.primary;
     final isEnabled = widget.onPressed != null;
 
     return TapScale(

@@ -20,6 +20,8 @@ class FeedNotifier extends StateNotifier<FeedState> {
   Future<void> _init() async {
     final feedResult = await _ref.read(notesServiceProvider).getFeedPeople();
 
+    print(feedResult.notes);
+
     state = FeedState.loaded(notes: feedResult.notes);
   }
 }

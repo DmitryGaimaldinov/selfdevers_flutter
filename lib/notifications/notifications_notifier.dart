@@ -4,7 +4,7 @@ import 'package:selfdevers/auth/auth_notifier.dart';
 import 'package:selfdevers/auth/auth_state.dart';
 import 'package:selfdevers/notifications/notifications_state.dart';
 
-final notificationsStateProvider = StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
+final notificationsStateProvider = StateNotifierProvider.autoDispose<NotificationsNotifier, NotificationsState>((ref) {
   return NotificationsNotifier(ref);
 });
 

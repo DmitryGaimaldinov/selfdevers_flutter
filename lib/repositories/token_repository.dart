@@ -6,15 +6,14 @@ import 'package:selfdevers/api/api_services.dart';
 import 'package:selfdevers/api/status_codes.dart';
 import 'package:selfdevers/utils/secure_storage.dart';
 
-final tokenRepositoryProvider = Provider<TokenRepository>((ref) {
-  return TokenRepository._(ref);
-});
-
+// final tokenRepositoryProvider = Provider<TokenRepository>((ref) {
+//   return TokenRepository._(ref);
+// });
 
 class TokenRepository {
-  final Ref _ref;
-
-  TokenRepository._(this._ref);
+  final _dio = Dio(BaseOptions(
+    baseUrl: BASE_URL,
+  ));
 
   Future<String?> loadAccessToken() async {
     print('start loading access token');
@@ -28,10 +27,6 @@ class TokenRepository {
     if (refreshToken == null) {
       return null;
     }
-
-    final _dio = Dio(BaseOptions(
-      baseUrl: BASE_URL,
-    ));
 
     try {
       final response = await _dio.post(ApiServices.refreshTokens, data: {

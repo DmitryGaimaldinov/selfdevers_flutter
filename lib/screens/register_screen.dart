@@ -9,6 +9,7 @@ import 'package:selfdevers/auth/auth_notifier.dart';
 import 'package:selfdevers/auth/exceptions/auth_exception.dart';
 import 'package:selfdevers/styles/text_styles.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:selfdevers/widgets/frosted_container.dart';
 import 'package:selfdevers/widgets/login/login_button.dart';
 import 'package:selfdevers/widgets/login/login_title_text.dart';
 import 'package:selfdevers/widgets/neon_icon_button.dart';
@@ -143,108 +144,84 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final backgroundColor = theme.colorScheme.surface.withOpacity(0.3);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomCenter,
-                  colors: [theme.colorScheme.surface.withOpacity(0.8), theme.colorScheme.surface.withOpacity(0.3)]
+      body: FrostedContainer(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0.0,
+              pinned: true,
+              leading: NeonIconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.close),
+              ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Column(
+                    children: [
+                      Spacer(),
+                      LoginTitleText('Станьте частью сообщества саморазвиванцев!'),
+                      Spacer(flex: 2),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        child: Column(
+                          children: [
+                            _NameTextField(controller: _nameController),
+                            SizedBox(height: 16),
+                            Consumer(
+                              builder: (_, ref, __) {
+                                return EmailTextField(
+                                  controller: _emailController,
+                                  errorText: ref.watch(emailErrorTextProvider),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 16),
+                            Consumer(
+                              builder: (_, ref, __) {
+                                return PasswordTextField(
+                                  controller: _passwordController,
+                                  errorText: ref.watch(passwordErrorTextProvider),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 32),
+                      NeonOutlinedButton(
+                        onPressed: _submitRegister,
+                        child: Text('Зарегестрироваться'),
+                      ),
+                      // LoginButton(
+                      //   onPressed: _submitRegister,
+                      //   child: const Text('Зарегестрироваться'),
+                      // ),
+                      Spacer(),
+                      LoginFooter(
+                        noActionText: 'Уже имеете аккаунт?',
+                        actionText: 'Войти',
+                        onActionTextTap: () {
+                          ref.read(loginStateProvider.notifier).state = LoginState.login;
+                        },
+                      ),
+                      SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned.fill(
-            child: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0.0,
-                  pinned: true,
-                  leading: NeonIconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(Icons.close),
-                  ),
-                ),
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 28),
-                      child: Column(
-                        children: [
-                          Spacer(),
-                          // NeonText(
-                          //   text: 'Станьте частью сообщества саморазвиванцев',
-                          //   textAlign: TextAlign.center,
-                          //   textSize: 24,
-                          //   fontWeight: FontWeight.w800,
-                          //   spreadColor: Colors.white,
-                          // ),
-                          LoginTitleText('Станьте частью сообщества саморазвиванцев'),
-                          Spacer(flex: 2),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 28),
-                            child: Column(
-                              children: [
-                                _NameTextField(controller: _nameController),
-                                SizedBox(height: 16),
-                                Consumer(
-                                  builder: (_, ref, __) {
-                                    return EmailTextField(
-                                      controller: _emailController,
-                                      errorText: ref.watch(emailErrorTextProvider),
-                                    );
-                                  },
-                                ),
-                                SizedBox(height: 16),
-                                Consumer(
-                                  builder: (_, ref, __) {
-                                    return PasswordTextField(
-                                      controller: _passwordController,
-                                      errorText: ref.watch(passwordErrorTextProvider),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 32),
-                          NeonOutlinedButton(
-                            onPressed: _submitRegister,
-                            child: Text('Зарегестрироваться'),
-                          ),
-                          // LoginButton(
-                          //   onPressed: _submitRegister,
-                          //   child: const Text('Зарегестрироваться'),
-                          // ),
-                          Spacer(),
-                          LoginFooter(
-                            noActionText: 'Уже имеете аккаунт?',
-                            actionText: 'Войти',
-                            onActionTextTap: () {
-                              ref.read(loginStateProvider.notifier).state = LoginState.login;
-                            },
-                          ),
-                          SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

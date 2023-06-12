@@ -11,10 +11,18 @@ _$_FollowRequestNotificationContentDto
             Map<String, dynamic> json) =>
         _$_FollowRequestNotificationContentDto(
           follower: UserDto.fromJson(json['follower'] as Map<String, dynamic>),
+          notificationType:
+              $enumDecode(_$NotificationTypeEnumMap, json['notificationType']),
         );
 
 Map<String, dynamic> _$$_FollowRequestNotificationContentDtoToJson(
         _$_FollowRequestNotificationContentDto instance) =>
     <String, dynamic>{
       'follower': instance.follower,
+      'notificationType': _$NotificationTypeEnumMap[instance.notificationType]!,
     };
+
+const _$NotificationTypeEnumMap = {
+  NotificationType.follow: 'follow',
+  NotificationType.followRequest: 'followRequest',
+};

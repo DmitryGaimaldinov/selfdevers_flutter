@@ -21,6 +21,7 @@ FollowNotificationContentDto _$FollowNotificationContentDtoFromJson(
 
 /// @nodoc
 mixin _$FollowNotificationContentDto {
+  NotificationType get notificationType => throw _privateConstructorUsedError;
   UserDto get follower => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -37,7 +38,7 @@ abstract class $FollowNotificationContentDtoCopyWith<$Res> {
       _$FollowNotificationContentDtoCopyWithImpl<$Res,
           FollowNotificationContentDto>;
   @useResult
-  $Res call({UserDto follower});
+  $Res call({NotificationType notificationType, UserDto follower});
 
   $UserDtoCopyWith<$Res> get follower;
 }
@@ -56,9 +57,14 @@ class _$FollowNotificationContentDtoCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? notificationType = null,
     Object? follower = null,
   }) {
     return _then(_value.copyWith(
+      notificationType: null == notificationType
+          ? _value.notificationType
+          : notificationType // ignore: cast_nullable_to_non_nullable
+              as NotificationType,
       follower: null == follower
           ? _value.follower
           : follower // ignore: cast_nullable_to_non_nullable
@@ -84,7 +90,7 @@ abstract class _$$_FollowNotificationContentDtoCopyWith<$Res>
       __$$_FollowNotificationContentDtoCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({UserDto follower});
+  $Res call({NotificationType notificationType, UserDto follower});
 
   @override
   $UserDtoCopyWith<$Res> get follower;
@@ -103,9 +109,14 @@ class __$$_FollowNotificationContentDtoCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? notificationType = null,
     Object? follower = null,
   }) {
     return _then(_$_FollowNotificationContentDto(
+      notificationType: null == notificationType
+          ? _value.notificationType
+          : notificationType // ignore: cast_nullable_to_non_nullable
+              as NotificationType,
       follower: null == follower
           ? _value.follower
           : follower // ignore: cast_nullable_to_non_nullable
@@ -117,17 +128,20 @@ class __$$_FollowNotificationContentDtoCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$_FollowNotificationContentDto implements _FollowNotificationContentDto {
-  _$_FollowNotificationContentDto({required this.follower});
+  _$_FollowNotificationContentDto(
+      {required this.notificationType, required this.follower});
 
   factory _$_FollowNotificationContentDto.fromJson(Map<String, dynamic> json) =>
       _$$_FollowNotificationContentDtoFromJson(json);
 
   @override
+  final NotificationType notificationType;
+  @override
   final UserDto follower;
 
   @override
   String toString() {
-    return 'FollowNotificationContentDto(follower: $follower)';
+    return 'FollowNotificationContentDto(notificationType: $notificationType, follower: $follower)';
   }
 
   @override
@@ -135,13 +149,15 @@ class _$_FollowNotificationContentDto implements _FollowNotificationContentDto {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_FollowNotificationContentDto &&
+            (identical(other.notificationType, notificationType) ||
+                other.notificationType == notificationType) &&
             (identical(other.follower, follower) ||
                 other.follower == follower));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, follower);
+  int get hashCode => Object.hash(runtimeType, notificationType, follower);
 
   @JsonKey(ignore: true)
   @override
@@ -160,12 +176,15 @@ class _$_FollowNotificationContentDto implements _FollowNotificationContentDto {
 
 abstract class _FollowNotificationContentDto
     implements FollowNotificationContentDto {
-  factory _FollowNotificationContentDto({required final UserDto follower}) =
-      _$_FollowNotificationContentDto;
+  factory _FollowNotificationContentDto(
+      {required final NotificationType notificationType,
+      required final UserDto follower}) = _$_FollowNotificationContentDto;
 
   factory _FollowNotificationContentDto.fromJson(Map<String, dynamic> json) =
       _$_FollowNotificationContentDto.fromJson;
 
+  @override
+  NotificationType get notificationType;
   @override
   UserDto get follower;
   @override

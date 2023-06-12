@@ -11,13 +11,17 @@ class NoteDto with _$NoteDto {
     required int id,
     required String text,
     required List<ImageDto> images,
-    required bool isRepostedOrQuoted,
-    required bool canBeReposted,
+    required bool isQuoted,
     required bool isEdited,
     required UserDto creator,
     required DateTime creationDate,
     required bool isMyNote,
+    required int likeCount,
+    required bool isLikedByMe,
+    required int quoteCount,
+    NoteDto? quotedNoteDto,
   }) = _NoteDto;
 
-  factory NoteDto.fromJson(Map<String, dynamic> json) => _$NoteDtoFromJson(json);
+  factory NoteDto.fromJson(Map<String, dynamic> json) =>
+      _$NoteDtoFromJson(json);
 }

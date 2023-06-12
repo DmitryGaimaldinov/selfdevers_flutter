@@ -10,12 +10,13 @@ import 'package:selfdevers/profile/pick_and_crop_image.dart';
 
 import 'create_note_state.dart';
 
-final createNoteStateProvider = StateNotifierProvider.autoDispose<CreateNoteNotifier, CreateNoteState>((ref) {
+final createNoteStateProvider =
+    StateNotifierProvider.autoDispose<CreateNoteNotifier, CreateNoteState>(
+        (ref) {
   final notifier = CreateNoteNotifier(ref);
 
   return notifier;
 });
-
 
 // TODO: будет хранить в себе состояние контента
 // и в зависимости от него в состоянии выдавать
@@ -27,7 +28,8 @@ final createNoteStateProvider = StateNotifierProvider.autoDispose<CreateNoteNoti
 class CreateNoteNotifier extends StateNotifier<CreateNoteState> {
   final Ref _ref;
 
-  CreateNoteNotifier(this._ref) : super(const CreateNoteState(isSending: false));
+  CreateNoteNotifier(this._ref)
+      : super(const CreateNoteState(isSending: false));
 
   CancelToken? _cancelToken;
 
@@ -45,11 +47,8 @@ class CreateNoteNotifier extends StateNotifier<CreateNoteState> {
       // Загружаем фотографии на сервер
       if (dto.imageXFiles.isNotEmpty) {
         final List<MemoryNamedImage> images = await Future.wait(
-          dto.imageXFiles.map((xFile) async =>
-              MemoryNamedImage(
-                  filename: xFile.name,
-                  imageBytes: await xFile.readAsBytes()
-              )),
+          dto.imageXFiles.map((xFile) async => MemoryNamedImage(
+              filename: xFile.name, imageBytes: await xFile.readAsBytes())),
         );
         _cancelToken = CancelToken();
         final uploadResult = await PhotosService(_ref).uploadImages(
@@ -65,14 +64,14 @@ class CreateNoteNotifier extends StateNotifier<CreateNoteState> {
       // Загружаем пост на сервер
       _cancelToken = CancelToken();
       final int noteId = await _ref.read(notesServiceProvider).createNote(
-        CreateNoteDto(
-          text: dto.text,
-          parentId: parentId,
-          quotedNoteId: dto.quotedNoteId,
-          imageIds: imageIds,
-        ),
-        cancelToken: _cancelToken,
-      );
+            CreateNoteDto(
+              text: dto.text,
+              parentId: parentId,
+              quotedNoteId: dto.quotedNoteId,
+              imageIds: imageIds,
+            ),
+            cancelToken: _cancelToken,
+          );
       parentId = noteId;
       if (!mounted) {
         break;

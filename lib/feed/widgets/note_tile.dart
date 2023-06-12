@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:selfdevers/api/notes/dto/note_dto.dart';
+import 'package:selfdevers/api/notes/notes_service.dart';
+import 'package:selfdevers/create_note/create_note_dialog.dart';
+import 'package:selfdevers/create_note/widgets/quoted_note_view.dart';
+import 'package:selfdevers/feed/widgets/network_note_image_view.dart';
 import 'package:selfdevers/feed/widgets/note_button.dart';
+import 'package:selfdevers/feed/widgets/note_image_view.dart';
+import 'package:selfdevers/feed/widgets/note_repost_button.dart';
 import 'package:selfdevers/note/note_screen.dart';
 import 'package:selfdevers/profile/screens/profile_screen.dart';
 import 'package:selfdevers/profile/widgets/user_avatar.dart';
@@ -12,7 +19,7 @@ import 'package:selfdevers/widgets/neon_hover_container.dart';
 import 'package:selfdevers/widgets/tap_scale.dart';
 import 'package:selfdevers/widgets/underline_text_button.dart';
 
-class NoteTile extends StatefulWidget {
+class NoteTile extends ConsumerStatefulWidget {
   final NoteDto note;
   final VoidCallback? onProfileTap;
 
@@ -23,12 +30,14 @@ class NoteTile extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<NoteTile> createState() => _NoteTileState();
+  ConsumerState<NoteTile> createState() => _NoteTileState();
 }
 
-class _NoteTileState extends State<NoteTile> {
+class _NoteTileState extends ConsumerState<NoteTile> {
   bool _isTileHovered = false;
   bool _isUserHovered = false;
+
+  late NoteDto note = widget.note;
 
   void _onUserHovered() {
     setState(() => _isUserHovered = true);
@@ -43,6 +52,20 @@ class _NoteTileState extends State<NoteTile> {
     // Navigator.of(context).push(MaterialPageRoute(
     //     builder: (_) => ProfileScreen(userTag: widget.note.creator.userTag),
     // ));
+  }
+
+  Future<void> _like() async {
+    await ref.read(notesServiceProvider).like(noteId: widget.note.id);
+    setState(() {
+      note = note.copyWith(isLikedByMe: true, likeCount: note.likeCount + 1);
+    });
+  }
+
+  Future<void> _unlike() async {
+    await ref.read(notesServiceProvider).unlike(noteId: widget.note.id);
+    setState(() {
+      note = note.copyWith(isLikedByMe: false, likeCount: note.likeCount - 1);
+    });
   }
 
   @override
@@ -61,7 +84,7 @@ class _NoteTileState extends State<NoteTile> {
           borderRadius: borderRadius,
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => NoteScreen(),
+              builder: (_) => NoteScreen(),
             ));
           },
           child: Ink(
@@ -72,11 +95,7 @@ class _NoteTileState extends State<NoteTile> {
             ),
             child: Padding(
               padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: 8
-              ),
+                  left: 16, right: 16, top: 16, bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -103,32 +122,29 @@ class _NoteTileState extends State<NoteTile> {
                           onExit: (_) => _onUserNotHovered(),
                           child: GestureDetector(
                             onTap: widget.onProfileTap ?? _goToProfile,
-                            child: Text.rich(
-                                TextSpan(
-                                  style: _isUserHovered
-                                      ? TextStyles.underlinedButton(context)
-                                      : null,
-                                  children: [
-                                    TextSpan(
-                                      text: widget.note.creator.name,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
+                            child: Text.rich(TextSpan(
+                                style: _isUserHovered
+                                    ? TextStyles.underlinedButton(context)
+                                    : null,
+                                children: [
+                                  TextSpan(
+                                    text: widget.note.creator.name,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
-                                    const WidgetSpan(child: SizedBox(width: 4)),
-                                    TextSpan(
-                                      text: '@${widget.note.creator.userTag}',
-                                      style: TextStyles.light1,
-                                    ),
-                                    const WidgetSpan(child: SizedBox(width: 4)),
-                                    TextSpan(
-                                        text: DateFormat.d().format(widget.note.creationDate),
-                                        style: TextStyles.light2
-                                    ),
-                                  ]
-                              )
-                            ),
+                                  ),
+                                  const WidgetSpan(child: SizedBox(width: 4)),
+                                  TextSpan(
+                                    text: '@${widget.note.creator.userTag}',
+                                    style: TextStyles.light1,
+                                  ),
+                                  const WidgetSpan(child: SizedBox(width: 4)),
+                                  TextSpan(
+                                      text: DateFormat.d()
+                                          .format(widget.note.creationDate),
+                                      style: TextStyles.light2),
+                                ])),
                           ),
                         ),
                         Text(
@@ -137,56 +153,20 @@ class _NoteTileState extends State<NoteTile> {
                             fontSize: 15,
                           ),
                         ),
+                        if (note.images.isNotEmpty)
+                          _buildImages(),
+
+                        if (note.quotedNoteDto != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: QuotedNoteView(
+                              note: note.quotedNoteDto!,
+                              onPressed: () {},
+                            ),
+                          ),
+
                         SizedBox(height: 8),
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            // maxWidth: 500,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              NoteActionButton(
-                                onPressed: () {},
-                                iconData: Icons.mode_comment_outlined,
-                                label: '30',
-                                // child: Wrap(
-                                //   crossAxisAlignment: WrapCrossAlignment.center,
-                                //   children: [
-                                //     Icon(Icons.mode_comment_outlined, size: 16, color: Theme.of(context).colorScheme.onSurface),
-                                //     SizedBox(width: 8),
-                                //     Text('16'),
-                                //   ],
-                                // ),
-                              ),
-                              NoteActionButton(
-                                onPressed: () {},
-                                iconData: Icons.repeat,
-                                label: '16',
-                                hoverColor: Colors.green,
-                                // child: Wrap(
-                                //   crossAxisAlignment: WrapCrossAlignment.center,
-                                //   children: [
-                                //     Icon(, size: 16, color: Colors.black.withOpacity(0.6)),
-                                //     SizedBox(width: 8),
-                                //     Text('16'),
-                                //   ],
-                                // ),
-                              ),
-                              NoteLikeButton(
-                                onChanged: (isLiked) {
-                                  // TODO
-                                },
-                                likeCount: 16,
-                                isLiked: false,
-                              ),
-                              NoteActionButton(
-                                onPressed: null,
-                                iconData: Icons.remove_red_eye,
-                                label: '100',
-                              ),
-                            ],
-                          ),
-                        ),
+                        _buildButtons(),
                       ],
                     ),
                   ),
@@ -196,6 +176,87 @@ class _NoteTileState extends State<NoteTile> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildImages() {
+    final images = widget.note.images;
+
+    const spaceBetween = 8.0;
+
+    print('build images');
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+                child: Column(
+                  children: [
+                    Expanded(child: NetworkNoteImageView(images[0])),
+                    if (images.length == 4)
+                      const SizedBox(height: spaceBetween),
+                    if (images.length == 4)
+                      Expanded(child: NetworkNoteImageView(images[2])),
+                  ],
+                )),
+            if (images.length > 1)
+              const SizedBox(width: spaceBetween),
+            if (images.length > 1)
+              Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(child: NetworkNoteImageView(images[1])),
+                      if (images.length == 3 ||
+                          images.length == 4)
+                        const SizedBox(height: spaceBetween),
+                      if (images.length == 3)
+                        Expanded(child: NetworkNoteImageView(images[2])),
+                      if (images.length == 4)
+                        Expanded(child: NetworkNoteImageView(images[3])),
+                    ],
+                  )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Row _buildButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        NoteActionButton(
+          onPressed: () {},
+          iconData: Icons.mode_comment_outlined,
+          label: '-1',
+        ),
+        NoteQuoteButton(
+          onPressed: () {
+            showCreateNoteDialog(context, quotedNoteDto: note);
+          },
+          quoteCount: note.quoteCount,
+        ),
+        NoteLikeButton(
+          onChanged: (isLiked) {
+            if (isLiked) {
+              _like();
+            } else {
+              _unlike();
+            }
+          },
+          likeCount: note.likeCount,
+          isLiked: note.isLikedByMe,
+        ),
+        NoteActionButton(
+          onPressed: null,
+          iconData: Icons.remove_red_eye,
+          label: '100',
+        ),
+      ],
     );
   }
 }

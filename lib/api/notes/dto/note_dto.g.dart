@@ -12,12 +12,17 @@ _$_NoteDto _$$_NoteDtoFromJson(Map<String, dynamic> json) => _$_NoteDto(
       images: (json['images'] as List<dynamic>)
           .map((e) => ImageDto.fromJson(e as Map<String, dynamic>))
           .toList(),
-      isRepostedOrQuoted: json['isRepostedOrQuoted'] as bool,
-      canBeReposted: json['canBeReposted'] as bool,
+      isQuoted: json['isQuoted'] as bool,
       isEdited: json['isEdited'] as bool,
       creator: UserDto.fromJson(json['creator'] as Map<String, dynamic>),
       creationDate: DateTime.parse(json['creationDate'] as String),
       isMyNote: json['isMyNote'] as bool,
+      likeCount: json['likeCount'] as int,
+      isLikedByMe: json['isLikedByMe'] as bool,
+      quoteCount: json['quoteCount'] as int,
+      quotedNoteDto: json['quotedNoteDto'] == null
+          ? null
+          : NoteDto.fromJson(json['quotedNoteDto'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$_NoteDtoToJson(_$_NoteDto instance) =>
@@ -25,10 +30,13 @@ Map<String, dynamic> _$$_NoteDtoToJson(_$_NoteDto instance) =>
       'id': instance.id,
       'text': instance.text,
       'images': instance.images,
-      'isRepostedOrQuoted': instance.isRepostedOrQuoted,
-      'canBeReposted': instance.canBeReposted,
+      'isQuoted': instance.isQuoted,
       'isEdited': instance.isEdited,
       'creator': instance.creator,
       'creationDate': instance.creationDate.toIso8601String(),
       'isMyNote': instance.isMyNote,
+      'likeCount': instance.likeCount,
+      'isLikedByMe': instance.isLikedByMe,
+      'quoteCount': instance.quoteCount,
+      'quotedNoteDto': instance.quotedNoteDto,
     };

@@ -32,8 +32,8 @@ class _NoteActionButtonState extends State<NoteActionButton> {
     final Color hoverColor = (_isHovered && widget.hoverColor != null)
         ? widget.hoverColor!
         : (widget.contentColor != null)
-            ? widget.contentColor!
-            : Theme.of(context).colorScheme.onSurface.withOpacity(0.7);
+        ? widget.contentColor!
+        : Theme.of(context).colorScheme.onSurface.withOpacity(0.7);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),

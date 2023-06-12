@@ -23,12 +23,15 @@ mixin _$NoteDto {
   int get id => throw _privateConstructorUsedError;
   String get text => throw _privateConstructorUsedError;
   List<ImageDto> get images => throw _privateConstructorUsedError;
-  bool get isRepostedOrQuoted => throw _privateConstructorUsedError;
-  bool get canBeReposted => throw _privateConstructorUsedError;
+  bool get isQuoted => throw _privateConstructorUsedError;
   bool get isEdited => throw _privateConstructorUsedError;
   UserDto get creator => throw _privateConstructorUsedError;
   DateTime get creationDate => throw _privateConstructorUsedError;
   bool get isMyNote => throw _privateConstructorUsedError;
+  int get likeCount => throw _privateConstructorUsedError;
+  bool get isLikedByMe => throw _privateConstructorUsedError;
+  int get quoteCount => throw _privateConstructorUsedError;
+  NoteDto? get quotedNoteDto => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -44,14 +47,18 @@ abstract class $NoteDtoCopyWith<$Res> {
       {int id,
       String text,
       List<ImageDto> images,
-      bool isRepostedOrQuoted,
-      bool canBeReposted,
+      bool isQuoted,
       bool isEdited,
       UserDto creator,
       DateTime creationDate,
-      bool isMyNote});
+      bool isMyNote,
+      int likeCount,
+      bool isLikedByMe,
+      int quoteCount,
+      NoteDto? quotedNoteDto});
 
   $UserDtoCopyWith<$Res> get creator;
+  $NoteDtoCopyWith<$Res>? get quotedNoteDto;
 }
 
 /// @nodoc
@@ -70,12 +77,15 @@ class _$NoteDtoCopyWithImpl<$Res, $Val extends NoteDto>
     Object? id = null,
     Object? text = null,
     Object? images = null,
-    Object? isRepostedOrQuoted = null,
-    Object? canBeReposted = null,
+    Object? isQuoted = null,
     Object? isEdited = null,
     Object? creator = null,
     Object? creationDate = null,
     Object? isMyNote = null,
+    Object? likeCount = null,
+    Object? isLikedByMe = null,
+    Object? quoteCount = null,
+    Object? quotedNoteDto = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -90,13 +100,9 @@ class _$NoteDtoCopyWithImpl<$Res, $Val extends NoteDto>
           ? _value.images
           : images // ignore: cast_nullable_to_non_nullable
               as List<ImageDto>,
-      isRepostedOrQuoted: null == isRepostedOrQuoted
-          ? _value.isRepostedOrQuoted
-          : isRepostedOrQuoted // ignore: cast_nullable_to_non_nullable
-              as bool,
-      canBeReposted: null == canBeReposted
-          ? _value.canBeReposted
-          : canBeReposted // ignore: cast_nullable_to_non_nullable
+      isQuoted: null == isQuoted
+          ? _value.isQuoted
+          : isQuoted // ignore: cast_nullable_to_non_nullable
               as bool,
       isEdited: null == isEdited
           ? _value.isEdited
@@ -114,6 +120,22 @@ class _$NoteDtoCopyWithImpl<$Res, $Val extends NoteDto>
           ? _value.isMyNote
           : isMyNote // ignore: cast_nullable_to_non_nullable
               as bool,
+      likeCount: null == likeCount
+          ? _value.likeCount
+          : likeCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      isLikedByMe: null == isLikedByMe
+          ? _value.isLikedByMe
+          : isLikedByMe // ignore: cast_nullable_to_non_nullable
+              as bool,
+      quoteCount: null == quoteCount
+          ? _value.quoteCount
+          : quoteCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      quotedNoteDto: freezed == quotedNoteDto
+          ? _value.quotedNoteDto
+          : quotedNoteDto // ignore: cast_nullable_to_non_nullable
+              as NoteDto?,
     ) as $Val);
   }
 
@@ -122,6 +144,18 @@ class _$NoteDtoCopyWithImpl<$Res, $Val extends NoteDto>
   $UserDtoCopyWith<$Res> get creator {
     return $UserDtoCopyWith<$Res>(_value.creator, (value) {
       return _then(_value.copyWith(creator: value) as $Val);
+    });
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $NoteDtoCopyWith<$Res>? get quotedNoteDto {
+    if (_value.quotedNoteDto == null) {
+      return null;
+    }
+
+    return $NoteDtoCopyWith<$Res>(_value.quotedNoteDto!, (value) {
+      return _then(_value.copyWith(quotedNoteDto: value) as $Val);
     });
   }
 }
@@ -137,15 +171,20 @@ abstract class _$$_NoteDtoCopyWith<$Res> implements $NoteDtoCopyWith<$Res> {
       {int id,
       String text,
       List<ImageDto> images,
-      bool isRepostedOrQuoted,
-      bool canBeReposted,
+      bool isQuoted,
       bool isEdited,
       UserDto creator,
       DateTime creationDate,
-      bool isMyNote});
+      bool isMyNote,
+      int likeCount,
+      bool isLikedByMe,
+      int quoteCount,
+      NoteDto? quotedNoteDto});
 
   @override
   $UserDtoCopyWith<$Res> get creator;
+  @override
+  $NoteDtoCopyWith<$Res>? get quotedNoteDto;
 }
 
 /// @nodoc
@@ -161,12 +200,15 @@ class __$$_NoteDtoCopyWithImpl<$Res>
     Object? id = null,
     Object? text = null,
     Object? images = null,
-    Object? isRepostedOrQuoted = null,
-    Object? canBeReposted = null,
+    Object? isQuoted = null,
     Object? isEdited = null,
     Object? creator = null,
     Object? creationDate = null,
     Object? isMyNote = null,
+    Object? likeCount = null,
+    Object? isLikedByMe = null,
+    Object? quoteCount = null,
+    Object? quotedNoteDto = freezed,
   }) {
     return _then(_$_NoteDto(
       id: null == id
@@ -181,13 +223,9 @@ class __$$_NoteDtoCopyWithImpl<$Res>
           ? _value._images
           : images // ignore: cast_nullable_to_non_nullable
               as List<ImageDto>,
-      isRepostedOrQuoted: null == isRepostedOrQuoted
-          ? _value.isRepostedOrQuoted
-          : isRepostedOrQuoted // ignore: cast_nullable_to_non_nullable
-              as bool,
-      canBeReposted: null == canBeReposted
-          ? _value.canBeReposted
-          : canBeReposted // ignore: cast_nullable_to_non_nullable
+      isQuoted: null == isQuoted
+          ? _value.isQuoted
+          : isQuoted // ignore: cast_nullable_to_non_nullable
               as bool,
       isEdited: null == isEdited
           ? _value.isEdited
@@ -205,6 +243,22 @@ class __$$_NoteDtoCopyWithImpl<$Res>
           ? _value.isMyNote
           : isMyNote // ignore: cast_nullable_to_non_nullable
               as bool,
+      likeCount: null == likeCount
+          ? _value.likeCount
+          : likeCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      isLikedByMe: null == isLikedByMe
+          ? _value.isLikedByMe
+          : isLikedByMe // ignore: cast_nullable_to_non_nullable
+              as bool,
+      quoteCount: null == quoteCount
+          ? _value.quoteCount
+          : quoteCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      quotedNoteDto: freezed == quotedNoteDto
+          ? _value.quotedNoteDto
+          : quotedNoteDto // ignore: cast_nullable_to_non_nullable
+              as NoteDto?,
     ));
   }
 }
@@ -216,12 +270,15 @@ class _$_NoteDto implements _NoteDto {
       {required this.id,
       required this.text,
       required final List<ImageDto> images,
-      required this.isRepostedOrQuoted,
-      required this.canBeReposted,
+      required this.isQuoted,
       required this.isEdited,
       required this.creator,
       required this.creationDate,
-      required this.isMyNote})
+      required this.isMyNote,
+      required this.likeCount,
+      required this.isLikedByMe,
+      required this.quoteCount,
+      this.quotedNoteDto})
       : _images = images;
 
   factory _$_NoteDto.fromJson(Map<String, dynamic> json) =>
@@ -240,9 +297,7 @@ class _$_NoteDto implements _NoteDto {
   }
 
   @override
-  final bool isRepostedOrQuoted;
-  @override
-  final bool canBeReposted;
+  final bool isQuoted;
   @override
   final bool isEdited;
   @override
@@ -251,10 +306,18 @@ class _$_NoteDto implements _NoteDto {
   final DateTime creationDate;
   @override
   final bool isMyNote;
+  @override
+  final int likeCount;
+  @override
+  final bool isLikedByMe;
+  @override
+  final int quoteCount;
+  @override
+  final NoteDto? quotedNoteDto;
 
   @override
   String toString() {
-    return 'NoteDto(id: $id, text: $text, images: $images, isRepostedOrQuoted: $isRepostedOrQuoted, canBeReposted: $canBeReposted, isEdited: $isEdited, creator: $creator, creationDate: $creationDate, isMyNote: $isMyNote)';
+    return 'NoteDto(id: $id, text: $text, images: $images, isQuoted: $isQuoted, isEdited: $isEdited, creator: $creator, creationDate: $creationDate, isMyNote: $isMyNote, likeCount: $likeCount, isLikedByMe: $isLikedByMe, quoteCount: $quoteCount, quotedNoteDto: $quotedNoteDto)';
   }
 
   @override
@@ -265,17 +328,23 @@ class _$_NoteDto implements _NoteDto {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.text, text) || other.text == text) &&
             const DeepCollectionEquality().equals(other._images, _images) &&
-            (identical(other.isRepostedOrQuoted, isRepostedOrQuoted) ||
-                other.isRepostedOrQuoted == isRepostedOrQuoted) &&
-            (identical(other.canBeReposted, canBeReposted) ||
-                other.canBeReposted == canBeReposted) &&
+            (identical(other.isQuoted, isQuoted) ||
+                other.isQuoted == isQuoted) &&
             (identical(other.isEdited, isEdited) ||
                 other.isEdited == isEdited) &&
             (identical(other.creator, creator) || other.creator == creator) &&
             (identical(other.creationDate, creationDate) ||
                 other.creationDate == creationDate) &&
             (identical(other.isMyNote, isMyNote) ||
-                other.isMyNote == isMyNote));
+                other.isMyNote == isMyNote) &&
+            (identical(other.likeCount, likeCount) ||
+                other.likeCount == likeCount) &&
+            (identical(other.isLikedByMe, isLikedByMe) ||
+                other.isLikedByMe == isLikedByMe) &&
+            (identical(other.quoteCount, quoteCount) ||
+                other.quoteCount == quoteCount) &&
+            (identical(other.quotedNoteDto, quotedNoteDto) ||
+                other.quotedNoteDto == quotedNoteDto));
   }
 
   @JsonKey(ignore: true)
@@ -285,12 +354,15 @@ class _$_NoteDto implements _NoteDto {
       id,
       text,
       const DeepCollectionEquality().hash(_images),
-      isRepostedOrQuoted,
-      canBeReposted,
+      isQuoted,
       isEdited,
       creator,
       creationDate,
-      isMyNote);
+      isMyNote,
+      likeCount,
+      isLikedByMe,
+      quoteCount,
+      quotedNoteDto);
 
   @JsonKey(ignore: true)
   @override
@@ -311,12 +383,15 @@ abstract class _NoteDto implements NoteDto {
       {required final int id,
       required final String text,
       required final List<ImageDto> images,
-      required final bool isRepostedOrQuoted,
-      required final bool canBeReposted,
+      required final bool isQuoted,
       required final bool isEdited,
       required final UserDto creator,
       required final DateTime creationDate,
-      required final bool isMyNote}) = _$_NoteDto;
+      required final bool isMyNote,
+      required final int likeCount,
+      required final bool isLikedByMe,
+      required final int quoteCount,
+      final NoteDto? quotedNoteDto}) = _$_NoteDto;
 
   factory _NoteDto.fromJson(Map<String, dynamic> json) = _$_NoteDto.fromJson;
 
@@ -327,9 +402,7 @@ abstract class _NoteDto implements NoteDto {
   @override
   List<ImageDto> get images;
   @override
-  bool get isRepostedOrQuoted;
-  @override
-  bool get canBeReposted;
+  bool get isQuoted;
   @override
   bool get isEdited;
   @override
@@ -338,6 +411,14 @@ abstract class _NoteDto implements NoteDto {
   DateTime get creationDate;
   @override
   bool get isMyNote;
+  @override
+  int get likeCount;
+  @override
+  bool get isLikedByMe;
+  @override
+  int get quoteCount;
+  @override
+  NoteDto? get quotedNoteDto;
   @override
   @JsonKey(ignore: true)
   _$$_NoteDtoCopyWith<_$_NoteDto> get copyWith =>

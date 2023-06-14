@@ -28,25 +28,29 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
   }
 
   Future<void> _loadNotifications() async {
-    final result =
-        await _ref.read(notificationsServiceProvider).getNotifications();
-    final notifications = result.notifications;
-    final DateTime? lastViewed = result.lastViewed;
+    try {
+      final result = await _ref.read(notificationsServiceProvider).getNotifications();
+      final notifications = result.notifications;
+      final DateTime? lastViewed = result.lastViewed;
 
-    int unreadCount;
-    if (lastViewed == null) {
-      unreadCount = notifications.length;
-    } else {
-      unreadCount = notifications
-          .where((notification) => notification.date.isAfter(lastViewed))
-          .length;
+      int unreadCount;
+      if (lastViewed == null) {
+        unreadCount = notifications.length;
+      } else {
+        unreadCount = notifications
+            .where((notification) => notification.date.isAfter(lastViewed))
+            .length;
+      }
+
+      state = NotificationsState.loaded(
+        notifications: notifications,
+        unreadCount: unreadCount,
+        lastViewed: lastViewed,
+      );
+      markAsViewed();
+    } catch (e) {
+      rethrow;
     }
-
-    state = NotificationsState.loaded(
-      notifications: notifications,
-      unreadCount: unreadCount,
-      lastViewed: lastViewed,
-    );
   }
 
   Future<void> markAsViewed() async {

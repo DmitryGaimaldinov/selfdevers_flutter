@@ -16,26 +16,25 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$SearchNotesState {
-  List<Note> get notes => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(List<Note> notes) loading,
-    required TResult Function(List<Note> notes, bool isLoadingMore) loaded,
-    required TResult Function(List<Note> notes) error,
+    required TResult Function(List<NoteDto> notes) loading,
+    required TResult Function(List<NoteDto> notes) loaded,
+    required TResult Function() error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(List<Note> notes)? loading,
-    TResult? Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult? Function(List<Note> notes)? error,
+    TResult? Function(List<NoteDto> notes)? loading,
+    TResult? Function(List<NoteDto> notes)? loaded,
+    TResult? Function()? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(List<Note> notes)? loading,
-    TResult Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult Function(List<Note> notes)? error,
+    TResult Function(List<NoteDto> notes)? loading,
+    TResult Function(List<NoteDto> notes)? loaded,
+    TResult Function()? error,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -61,10 +60,6 @@ mixin _$SearchNotesState {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
-
-  @JsonKey(ignore: true)
-  $SearchNotesStateCopyWith<SearchNotesState> get copyWith =>
-      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -72,8 +67,6 @@ abstract class $SearchNotesStateCopyWith<$Res> {
   factory $SearchNotesStateCopyWith(
           SearchNotesState value, $Res Function(SearchNotesState) then) =
       _$SearchNotesStateCopyWithImpl<$Res, SearchNotesState>;
-  @useResult
-  $Res call({List<Note> notes});
 }
 
 /// @nodoc
@@ -85,30 +78,15 @@ class _$SearchNotesStateCopyWithImpl<$Res, $Val extends SearchNotesState>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? notes = null,
-  }) {
-    return _then(_value.copyWith(
-      notes: null == notes
-          ? _value.notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as List<Note>,
-    ) as $Val);
-  }
 }
 
 /// @nodoc
-abstract class _$$_LoadingCopyWith<$Res>
-    implements $SearchNotesStateCopyWith<$Res> {
+abstract class _$$_LoadingCopyWith<$Res> {
   factory _$$_LoadingCopyWith(
           _$_Loading value, $Res Function(_$_Loading) then) =
       __$$_LoadingCopyWithImpl<$Res>;
-  @override
   @useResult
-  $Res call({List<Note> notes});
+  $Res call({List<NoteDto> notes});
 }
 
 /// @nodoc
@@ -127,7 +105,7 @@ class __$$_LoadingCopyWithImpl<$Res>
       notes: null == notes
           ? _value._notes
           : notes // ignore: cast_nullable_to_non_nullable
-              as List<Note>,
+              as List<NoteDto>,
     ));
   }
 }
@@ -135,12 +113,12 @@ class __$$_LoadingCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_Loading implements _Loading {
-  _$_Loading({final List<Note> notes = const []}) : _notes = notes;
+  _$_Loading({final List<NoteDto> notes = const []}) : _notes = notes;
 
-  final List<Note> _notes;
+  final List<NoteDto> _notes;
   @override
   @JsonKey()
-  List<Note> get notes {
+  List<NoteDto> get notes {
     if (_notes is EqualUnmodifiableListView) return _notes;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_notes);
@@ -172,9 +150,9 @@ class _$_Loading implements _Loading {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(List<Note> notes) loading,
-    required TResult Function(List<Note> notes, bool isLoadingMore) loaded,
-    required TResult Function(List<Note> notes) error,
+    required TResult Function(List<NoteDto> notes) loading,
+    required TResult Function(List<NoteDto> notes) loaded,
+    required TResult Function() error,
   }) {
     return loading(notes);
   }
@@ -182,9 +160,9 @@ class _$_Loading implements _Loading {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(List<Note> notes)? loading,
-    TResult? Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult? Function(List<Note> notes)? error,
+    TResult? Function(List<NoteDto> notes)? loading,
+    TResult? Function(List<NoteDto> notes)? loaded,
+    TResult? Function()? error,
   }) {
     return loading?.call(notes);
   }
@@ -192,9 +170,9 @@ class _$_Loading implements _Loading {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(List<Note> notes)? loading,
-    TResult Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult Function(List<Note> notes)? error,
+    TResult Function(List<NoteDto> notes)? loading,
+    TResult Function(List<NoteDto> notes)? loaded,
+    TResult Function()? error,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -239,24 +217,20 @@ class _$_Loading implements _Loading {
 }
 
 abstract class _Loading implements SearchNotesState {
-  factory _Loading({final List<Note> notes}) = _$_Loading;
+  factory _Loading({final List<NoteDto> notes}) = _$_Loading;
 
-  @override
-  List<Note> get notes;
-  @override
+  List<NoteDto> get notes;
   @JsonKey(ignore: true)
   _$$_LoadingCopyWith<_$_Loading> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$_LoadedCopyWith<$Res>
-    implements $SearchNotesStateCopyWith<$Res> {
+abstract class _$$_LoadedCopyWith<$Res> {
   factory _$$_LoadedCopyWith(_$_Loaded value, $Res Function(_$_Loaded) then) =
       __$$_LoadedCopyWithImpl<$Res>;
-  @override
   @useResult
-  $Res call({List<Note> notes, bool isLoadingMore});
+  $Res call({List<NoteDto> notes});
 }
 
 /// @nodoc
@@ -270,17 +244,12 @@ class __$$_LoadedCopyWithImpl<$Res>
   @override
   $Res call({
     Object? notes = null,
-    Object? isLoadingMore = null,
   }) {
     return _then(_$_Loaded(
       notes: null == notes
           ? _value._notes
           : notes // ignore: cast_nullable_to_non_nullable
-              as List<Note>,
-      isLoadingMore: null == isLoadingMore
-          ? _value.isLoadingMore
-          : isLoadingMore // ignore: cast_nullable_to_non_nullable
-              as bool,
+              as List<NoteDto>,
     ));
   }
 }
@@ -288,24 +257,19 @@ class __$$_LoadedCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_Loaded implements _Loaded {
-  _$_Loaded({required final List<Note> notes, this.isLoadingMore = false})
-      : _notes = notes;
+  _$_Loaded({required final List<NoteDto> notes}) : _notes = notes;
 
-  final List<Note> _notes;
+  final List<NoteDto> _notes;
   @override
-  List<Note> get notes {
+  List<NoteDto> get notes {
     if (_notes is EqualUnmodifiableListView) return _notes;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_notes);
   }
 
   @override
-  @JsonKey()
-  final bool isLoadingMore;
-
-  @override
   String toString() {
-    return 'SearchNotesState.loaded(notes: $notes, isLoadingMore: $isLoadingMore)';
+    return 'SearchNotesState.loaded(notes: $notes)';
   }
 
   @override
@@ -313,14 +277,12 @@ class _$_Loaded implements _Loaded {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_Loaded &&
-            const DeepCollectionEquality().equals(other._notes, _notes) &&
-            (identical(other.isLoadingMore, isLoadingMore) ||
-                other.isLoadingMore == isLoadingMore));
+            const DeepCollectionEquality().equals(other._notes, _notes));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, const DeepCollectionEquality().hash(_notes), isLoadingMore);
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(_notes));
 
   @JsonKey(ignore: true)
   @override
@@ -331,33 +293,33 @@ class _$_Loaded implements _Loaded {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(List<Note> notes) loading,
-    required TResult Function(List<Note> notes, bool isLoadingMore) loaded,
-    required TResult Function(List<Note> notes) error,
+    required TResult Function(List<NoteDto> notes) loading,
+    required TResult Function(List<NoteDto> notes) loaded,
+    required TResult Function() error,
   }) {
-    return loaded(notes, isLoadingMore);
+    return loaded(notes);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(List<Note> notes)? loading,
-    TResult? Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult? Function(List<Note> notes)? error,
+    TResult? Function(List<NoteDto> notes)? loading,
+    TResult? Function(List<NoteDto> notes)? loaded,
+    TResult? Function()? error,
   }) {
-    return loaded?.call(notes, isLoadingMore);
+    return loaded?.call(notes);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(List<Note> notes)? loading,
-    TResult Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult Function(List<Note> notes)? error,
+    TResult Function(List<NoteDto> notes)? loading,
+    TResult Function(List<NoteDto> notes)? loaded,
+    TResult Function()? error,
     required TResult orElse(),
   }) {
     if (loaded != null) {
-      return loaded(notes, isLoadingMore);
+      return loaded(notes);
     }
     return orElse();
   }
@@ -398,26 +360,18 @@ class _$_Loaded implements _Loaded {
 }
 
 abstract class _Loaded implements SearchNotesState {
-  factory _Loaded({required final List<Note> notes, final bool isLoadingMore}) =
-      _$_Loaded;
+  factory _Loaded({required final List<NoteDto> notes}) = _$_Loaded;
 
-  @override
-  List<Note> get notes;
-  bool get isLoadingMore;
-  @override
+  List<NoteDto> get notes;
   @JsonKey(ignore: true)
   _$$_LoadedCopyWith<_$_Loaded> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class _$$_ErrorCopyWith<$Res>
-    implements $SearchNotesStateCopyWith<$Res> {
+abstract class _$$_ErrorCopyWith<$Res> {
   factory _$$_ErrorCopyWith(_$_Error value, $Res Function(_$_Error) then) =
       __$$_ErrorCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({List<Note> notes});
 }
 
 /// @nodoc
@@ -426,87 +380,57 @@ class __$$_ErrorCopyWithImpl<$Res>
     implements _$$_ErrorCopyWith<$Res> {
   __$$_ErrorCopyWithImpl(_$_Error _value, $Res Function(_$_Error) _then)
       : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? notes = null,
-  }) {
-    return _then(_$_Error(
-      notes: null == notes
-          ? _value._notes
-          : notes // ignore: cast_nullable_to_non_nullable
-              as List<Note>,
-    ));
-  }
 }
 
 /// @nodoc
 
 class _$_Error implements _Error {
-  _$_Error({required final List<Note> notes}) : _notes = notes;
-
-  final List<Note> _notes;
-  @override
-  List<Note> get notes {
-    if (_notes is EqualUnmodifiableListView) return _notes;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_notes);
-  }
+  _$_Error();
 
   @override
   String toString() {
-    return 'SearchNotesState.error(notes: $notes)';
+    return 'SearchNotesState.error()';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$_Error &&
-            const DeepCollectionEquality().equals(other._notes, _notes));
+        (other.runtimeType == runtimeType && other is _$_Error);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(_notes));
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$_ErrorCopyWith<_$_Error> get copyWith =>
-      __$$_ErrorCopyWithImpl<_$_Error>(this, _$identity);
+  int get hashCode => runtimeType.hashCode;
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function(List<Note> notes) loading,
-    required TResult Function(List<Note> notes, bool isLoadingMore) loaded,
-    required TResult Function(List<Note> notes) error,
+    required TResult Function(List<NoteDto> notes) loading,
+    required TResult Function(List<NoteDto> notes) loaded,
+    required TResult Function() error,
   }) {
-    return error(notes);
+    return error();
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(List<Note> notes)? loading,
-    TResult? Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult? Function(List<Note> notes)? error,
+    TResult? Function(List<NoteDto> notes)? loading,
+    TResult? Function(List<NoteDto> notes)? loaded,
+    TResult? Function()? error,
   }) {
-    return error?.call(notes);
+    return error?.call();
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function(List<Note> notes)? loading,
-    TResult Function(List<Note> notes, bool isLoadingMore)? loaded,
-    TResult Function(List<Note> notes)? error,
+    TResult Function(List<NoteDto> notes)? loading,
+    TResult Function(List<NoteDto> notes)? loaded,
+    TResult Function()? error,
     required TResult orElse(),
   }) {
     if (error != null) {
-      return error(notes);
+      return error();
     }
     return orElse();
   }
@@ -547,12 +471,5 @@ class _$_Error implements _Error {
 }
 
 abstract class _Error implements SearchNotesState {
-  factory _Error({required final List<Note> notes}) = _$_Error;
-
-  @override
-  List<Note> get notes;
-  @override
-  @JsonKey(ignore: true)
-  _$$_ErrorCopyWith<_$_Error> get copyWith =>
-      throw _privateConstructorUsedError;
+  factory _Error() = _$_Error;
 }

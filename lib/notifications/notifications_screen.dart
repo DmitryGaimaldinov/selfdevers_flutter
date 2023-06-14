@@ -8,6 +8,7 @@ import 'package:selfdevers/auth/auth_notifier.dart';
 import 'package:selfdevers/auth/auth_state.dart';
 import 'package:selfdevers/main.dart';
 import 'package:selfdevers/notifications/notifications_notifier.dart';
+import 'package:selfdevers/notifications/notifications_state.dart';
 import 'package:selfdevers/notifications/widgets/notification_tile.dart';
 import 'package:selfdevers/widgets/login/login_button.dart';
 import 'package:selfdevers/widgets/my_divider.dart';
@@ -23,13 +24,6 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
-
-  @override
-  void initState() {
-    super.initState();
-    ref.read(notificationsStateProvider.notifier).markAsViewed();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

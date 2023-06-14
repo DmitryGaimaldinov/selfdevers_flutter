@@ -92,7 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   IconThemeData get _selectedIconTheme {
     final theme = Theme.of(context);
-    return IconThemeData(
+    return theme.iconTheme.copyWith(
       color: theme.colorScheme.primary,
       shadows: [
         for (double i = 0; i < 2; i++)
@@ -233,8 +233,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             BottomNavigationBar(
               currentIndex: _bottomBarSelectedIndex,
               onTap: _onTap,
+              unselectedIconTheme: _selectedIconTheme.copyWith(color: Colors.white70, shadows: []),
+              unselectedLabelStyle: _selectedLabelStyle.copyWith(color: Colors.white70, shadows: []),
               selectedIconTheme: _selectedIconTheme,
               selectedLabelStyle: _selectedLabelStyle,
+              unselectedItemColor: Colors.white70,
+              selectedItemColor: Theme.of(context).colorScheme.primary,
               items: [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home),

@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:selfdevers/api/notes/dto/note_dto.dart';
 import 'package:selfdevers/api/notes/notes_service.dart';
+import 'package:selfdevers/api/photos/dtos/image_dto.dart';
 import 'package:selfdevers/create_note/create_note_dialog.dart';
 import 'package:selfdevers/create_note/widgets/quoted_note_view.dart';
 import 'package:selfdevers/feed/widgets/network_note_image_view.dart';
@@ -18,6 +20,7 @@ import 'package:selfdevers/profile/widgets/user_avatar.dart';
 import 'package:selfdevers/styles/text_styles.dart';
 import 'package:selfdevers/widgets/animated_neon_text_style.dart';
 import 'package:selfdevers/widgets/neon_hover_container.dart';
+import 'package:selfdevers/widgets/show_images_dialog.dart';
 import 'package:selfdevers/widgets/tap_scale.dart';
 import 'package:selfdevers/widgets/underline_text_button.dart';
 
@@ -154,9 +157,12 @@ class _NoteTileState extends ConsumerState<NoteTile> {
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: QuotedNoteView(
                                   note: note.quotedNoteDto!,
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    context.push('/note/${note.quotedNoteDto!.id}', extra: note.quotedNoteDto);
+                                  },
                                 ),
                               ),
+
 
                             SizedBox(height: 8),
                             _buildButtons(),
@@ -172,6 +178,10 @@ class _NoteTileState extends ConsumerState<NoteTile> {
         ),
       ),
     );
+  }
+
+  Future<void> _showImageDialog(ImageDto imageDto) async {
+    await showImageDialog(context: context, imageDto: imageDto);
   }
 
   Widget _buildImages() {
@@ -191,11 +201,13 @@ class _NoteTileState extends ConsumerState<NoteTile> {
             Expanded(
                 child: Column(
                   children: [
-                    Expanded(child: NetworkNoteImageView(images[0])),
+                    Expanded(
+                      child: NetworkNoteImageView(images[0], onTap: () => _showImageDialog(images[0])),
+                    ),
                     if (images.length == 4)
                       const SizedBox(height: spaceBetween),
                     if (images.length == 4)
-                      Expanded(child: NetworkNoteImageView(images[2])),
+                      Expanded(child: NetworkNoteImageView(images[2], onTap: () => _showImageDialog(images[2]))),
                   ],
                 )),
             if (images.length > 1)
@@ -204,14 +216,14 @@ class _NoteTileState extends ConsumerState<NoteTile> {
               Expanded(
                   child: Column(
                     children: [
-                      Expanded(child: NetworkNoteImageView(images[1])),
+                      Expanded(child: NetworkNoteImageView(images[1], onTap: () => _showImageDialog(images[1]))),
                       if (images.length == 3 ||
                           images.length == 4)
                         const SizedBox(height: spaceBetween),
                       if (images.length == 3)
-                        Expanded(child: NetworkNoteImageView(images[2])),
+                        Expanded(child: NetworkNoteImageView(images[2], onTap: () => _showImageDialog(images[2]))),
                       if (images.length == 4)
-                        Expanded(child: NetworkNoteImageView(images[3])),
+                        Expanded(child: NetworkNoteImageView(images[3], onTap: () => _showImageDialog(images[3]))),
                     ],
                   )),
           ],

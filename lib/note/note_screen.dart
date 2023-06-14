@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:selfdevers/api/notes/dto/note_dto.dart';
 import 'package:selfdevers/api/notes/notes_service.dart';
+import 'package:selfdevers/api/photos/dtos/image_dto.dart';
 import 'package:selfdevers/create_note/create_note_dialog.dart';
+import 'package:selfdevers/create_note/widgets/quoted_note_view.dart';
 import 'package:selfdevers/feed/note.dart';
+import 'package:selfdevers/feed/widgets/network_note_image_view.dart';
 import 'package:selfdevers/feed/widgets/note_button.dart';
 import 'package:selfdevers/feed/widgets/note_like_button.dart';
 import 'package:selfdevers/feed/widgets/note_repost_button.dart';
@@ -20,6 +24,7 @@ import 'package:selfdevers/profile/widgets/user_avatar.dart';
 import 'package:selfdevers/screens/error_screen.dart';
 import 'package:selfdevers/styles/text_styles.dart';
 import 'package:selfdevers/widgets/my_divider.dart';
+import 'package:selfdevers/widgets/show_images_dialog.dart';
 
 class NoteScreen extends ConsumerWidget {
   final int noteId;
@@ -157,6 +162,19 @@ class _DetailedNoteViewState extends ConsumerState<DetailedNoteView> {
                     fontSize: 15,
                   ),
                 ),
+                if (note.images.isNotEmpty)
+                  _buildImages(),
+
+                if (note.quotedNoteDto != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: QuotedNoteView(
+                      note: note.quotedNoteDto!,
+                      onPressed: () {
+                        context.push('/note/${note.quotedNoteDto!.id}', extra: note.quotedNoteDto);
+                      },
+                    ),
+                  ),
                 SizedBox(height: 8),
                 MyDivider(),
                 // Кнопки-счётчики
@@ -218,6 +236,58 @@ class _DetailedNoteViewState extends ConsumerState<DetailedNoteView> {
                 ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showImageDialog(ImageDto imageDto) async {
+    await showImageDialog(context: context, imageDto: imageDto);
+  }
+
+  Widget _buildImages() {
+    final images = widget.note.images;
+
+    const spaceBetween = 8.0;
+
+    print('build images');
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: NetworkNoteImageView(images[0], onTap: () => _showImageDialog(images[0])),
+                    ),
+                    if (images.length == 4)
+                      const SizedBox(height: spaceBetween),
+                    if (images.length == 4)
+                      Expanded(child: NetworkNoteImageView(images[2], onTap: () => _showImageDialog(images[2]))),
+                  ],
+                )),
+            if (images.length > 1)
+              const SizedBox(width: spaceBetween),
+            if (images.length > 1)
+              Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(child: NetworkNoteImageView(images[1], onTap: () => _showImageDialog(images[1]))),
+                      if (images.length == 3 ||
+                          images.length == 4)
+                        const SizedBox(height: spaceBetween),
+                      if (images.length == 3)
+                        Expanded(child: NetworkNoteImageView(images[2], onTap: () => _showImageDialog(images[2]))),
+                      if (images.length == 4)
+                        Expanded(child: NetworkNoteImageView(images[3], onTap: () => _showImageDialog(images[3]))),
+                    ],
+                  )),
           ],
         ),
       ),

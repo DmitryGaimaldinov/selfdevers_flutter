@@ -5,10 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:selfdevers/feed/feed_screen.dart';
 import 'package:selfdevers/feed/note.dart';
 import 'package:selfdevers/feed/widgets/note_tile.dart';
+import 'package:selfdevers/followers_list/followers_list_screen.dart';
 import 'package:selfdevers/main.dart';
 import 'package:selfdevers/profile/user.dart';
 import 'package:selfdevers/profile/widgets/user_avatar.dart';
 import 'package:selfdevers/home/home_screen.dart';
+import 'package:selfdevers/screens/error_screen.dart';
+import 'package:selfdevers/search/search_notes_body.dart';
+import 'package:selfdevers/search/search_notes_notifier.dart';
 import 'package:selfdevers/widgets/club_avatar.dart';
 import 'package:selfdevers/widgets/sliver_app_bar_delegate.dart';
 import 'package:rxdart/rxdart.dart';
@@ -16,164 +20,64 @@ import 'package:rxdart/rxdart.dart';
 import '../styles/text_styles.dart';
 import '../widgets/login_appbar_button.dart';
 
-final isSearchRequestingProvider = StateProvider.autoDispose<bool>((ref) {
-  return false;
-});
-
-class SearchScreen extends StatefulWidget {
-  final ScrollController? scrollController;
+class SearchScreen extends ConsumerStatefulWidget {
 
   const SearchScreen({
     Key? key,
-    this.scrollController,
   }) : super(key: key);
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen>
-    with AutomaticKeepAliveClientMixin<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen> {
+
+  late final TextEditingController _searchTextController;
+
+  Future<void> _search() async {
+    print('search notes');
+    print('filterType: ${ref.read(filterNotesTypeProvider)}');
+    print('text: ${_searchTextController.text}');
+
+    final text = _searchTextController.text;
+
+    ref.read(searchNotesProvider.notifier).searchNotes(
+      text: text,
+      filterNotesType: ref.read(filterNotesTypeProvider),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searchTextController = TextEditingController();
+    _searchTextController.addListener(() {
+      _search();
+    });
+    _search();
+  }
+
+  @override
+  void dispose() {
+    _searchTextController.dispose();
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-
     const appBarContentHeight = 40.0;
 
     final theme = Theme.of(context);
 
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          leading: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: appBarContentHeight,
-            ),
-            child: GestureDetector(
-                onTap: () {
-                  showSearch(
-                    context: context,
-                    delegate: MySearchDelegate(
-                      textStyle: theme.textTheme.bodyLarge!.copyWith(
-                        color: theme.primaryColor,
-                      ),
-                      hintTextStyle: theme.textTheme.bodyLarge!.copyWith(
-                        color: theme.hintColor,
-                      ),
-                    ),
-                  );
-                },
-                child: _buildLeadingAvatar()
-            ),
-          ),
-          title: Container(
-            constraints: BoxConstraints(
-              maxHeight: appBarContentHeight,
-            ),
-            child: Center(child: _buildSearchField()),
-          ),
-          actions: [
-            LoginAppBarButton(),
-          ],
-          bottom: TabBar(
-            indicatorSize: TabBarIndicatorSize.label,
-            isScrollable: true,
-            tabs: [
-              Tab(text: 'Посты'),
-              Tab(text: 'Клубы'),
-              Tab(text: 'Челленджи'),
-              Tab(text: 'Люди'),
-            ],
-          ),
-        ),
-        // TODO: Использовать CustomScrollView
-        body: Column(
-          children: [
-            Consumer(
-                builder: (context, ref, _) {
-                  final isRequesting = ref.watch(isSearchRequestingProvider);
+    ref.listen<FilterNotesType>(filterNotesTypeProvider, (previous, next) {
+      _search();
+    });
 
-                  return isRequesting
-                      ? const LinearProgressIndicator()
-                      : const SizedBox();
-                }
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildNotesBody(),
-                  _buildClubsBody(),
-                  Text('Список челленжей'),
-                  Text('Список людей'),
-                ],
-              ),
-            ),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: _buildSearchField(),
       ),
-    );
-  }
-
-  Widget _buildNotesBody() {
-    return Text('Сделать поиск постов');
-    // return ListView.builder(
-    //   itemCount: 100,
-    //   controller: widget.scrollController,
-    //   // controller: ScrollController(),
-    //   // primary: false,
-    //   // physics: NeverScrollableScrollPhysics(),
-    //   // shrinkWrap: true,
-    //   itemBuilder: (context, index) {
-    //     if (index == 0) {
-    //       return const CenterConstrained(child: _SearchNotesFilterButton());
-    //     }
-    //
-    //     return CenterConstrained(
-    //       child: NoteTile(note: Note(
-    //         index,
-    //         'Какая-то запись',
-    //         User(id: 0, name: 'name', userTag: 'userTag', description: 'description', registerDate: 'registerDate', avatarUrl: null, backgroundUrl: null, isPrivate: false),
-    //         false,
-    //         DateTime.now(),
-    //       )),
-    //     );
-    //   },
-    // );
-  }
-
-  Widget _buildClubsBody() {
-    return ListView.separated(
-      itemCount: 100,
-      // controller: ScrollController(),
-      // primary: false,
-      shrinkWrap: true,
-      itemBuilder: (context, index) {
-        return ClubTile(
-          onTap: () {},
-          nameLabel: 'Клуб любителей сырников',
-          subscribersCountLabel: '989 подписчиков',
-          avatar: ClubAvatar(
-            // onTap: () {},
-            blurhash: 'L5H2EC=PM+yV0g-mq.wG9c010J}I',
-          ),
-        );
-      },
-      separatorBuilder: (BuildContext context, int index) {
-        return Divider(
-          color: Colors.grey,
-          height: 1,
-          thickness: 1,
-        );
-      },
-    );
-  }
-
-  Widget _buildLeadingAvatar() {
-    return Padding(
-        padding: const EdgeInsets.all(12),
-        child: UserAvatar()
+      body: _NotesBody(),
     );
   }
 
@@ -182,11 +86,9 @@ class _SearchScreenState extends State<SearchScreen>
 
     return TextField(
       autofocus: false,
-      onSubmitted: (String) {
-
-      },
       textAlignVertical: TextAlignVertical.center,
       style: TextStyles.light1,
+      controller: _searchTextController,
       decoration: InputDecoration(
         filled: true,
         fillColor: theme.colorScheme.secondaryContainer,
@@ -203,43 +105,65 @@ class _SearchScreenState extends State<SearchScreen>
         ),
       ),
     );
-
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: theme.colorScheme.secondary)
-      ),
-      child: Center(
-        child: TextField(
-          textAlignVertical: TextAlignVertical.center,
-          decoration: InputDecoration(
-            fillColor: theme.colorScheme.secondaryContainer,
-            // icon: Icon(Icons.search),
-            border: InputBorder.none,
-            // contentPadding: EdgeInsets.zero,
-            hintText: 'Поиск постов',
-            hintStyle: TextStyle(color: theme.colorScheme.secondary),
-          ),
-          textCapitalization: TextCapitalization.sentences,
-          style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
-        ),
-      ),
-    );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
+class _NotesBody extends ConsumerWidget {
+  const _NotesBody({
+    Key? key,
+  }) : super(key: key);
 
-enum _FilterNotesType {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notesState = ref.watch(searchNotesProvider);
+
+    return notesState.when(
+        loading: (_) {
+          return const Center(child: CircularProgressIndicator());
+        },
+        loaded: (notes) {
+          print('notes.length: ${notes.length}');
+          if (notes.isEmpty) {
+            return Text('Постов не найдено');
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                _SearchNotesFilterButton(),
+                ...notes.map((note) => NoteTile(
+                  key: UniqueKey(),
+                  note: note
+                )),
+              ],
+            ),
+          );
+
+          // return ListView.builder(
+          //     itemCount: notes.length + 1,
+          //     shrinkWrap: true,
+          //     itemBuilder: (context, index) {
+          //       if (index == 0) {
+          //         return _SearchNotesFilterButton();
+          //       }
+          //
+          //       return
+          //     }
+          // );
+        },
+        error: () {
+          return const ErrorScreen();
+        }
+    );
+  }
+}
+
+enum FilterNotesType {
   popular,
   latest,
 }
 
-enum _FilterNotesPeriod {
+enum FilterNotesPeriod {
   day,
   week,
   month,
@@ -247,13 +171,13 @@ enum _FilterNotesPeriod {
   allTime,
 }
 
-final _filterNotesTypeProvider = StateProvider<_FilterNotesType>((ref) {
-  return _FilterNotesType.popular;
+final filterNotesTypeProvider = StateProvider<FilterNotesType>((ref) {
+  return FilterNotesType.latest;
 });
 
-final _filterNotesPeriodProvider = StateProvider<_FilterNotesPeriod>((ref) {
-  return _FilterNotesPeriod.day;
-});
+// final filterNotesPeriodProvider = StateProvider<FilterNotesPeriod>((ref) {
+//   return FilterNotesPeriod.day;
+// });
 
 
 class _SearchNotesFilterButton extends ConsumerStatefulWidget {
@@ -293,12 +217,12 @@ class _SearchNotesFilterButtonState extends ConsumerState<_SearchNotesFilterButt
     }
   }
 
-  void _changeFilterType(_FilterNotesType type) {
-    ref.read(_filterNotesTypeProvider.notifier).state = type;
+  void _changeFilterType(FilterNotesType type) {
+    ref.read(filterNotesTypeProvider.notifier).state = type;
   }
 
-  void _changeFilterPeriod(_FilterNotesPeriod period) {
-    ref.read(_filterNotesPeriodProvider.notifier).state = period;
+  void _changeFilterPeriod(FilterNotesPeriod period) {
+    // ref.read(filterNotesPeriodProvider.notifier).state = period;
   }
 
   @override
@@ -348,29 +272,29 @@ class _SearchNotesFilterButtonState extends ConsumerState<_SearchNotesFilterButt
                     Text(
                       'Показывать',
                       style: TextStyle(
-                          color: theme.colorScheme.onPrimaryContainer,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold
                       ),
                     ),
                     SizedBox(height: 8),
                     _buildFilterTypeChips(),
-                    if (ref.watch(_filterNotesTypeProvider) == _FilterNotesType.popular)
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 16),
-                          Text(
-                            'Показывать',
-                            style: TextStyle(
-                                color: theme.colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.bold
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          _buildFilterPeriodChips(),
-                        ],
-                      )
+                    // if (ref.watch(filterNotesTypeProvider) == FilterNotesType.popular)
+                    //   Column(
+                    //     mainAxisSize: MainAxisSize.min,
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       SizedBox(height: 16),
+                    //       Text(
+                    //         'Показывать',
+                    //         style: TextStyle(
+                    //             color: theme.colorScheme.onPrimaryContainer,
+                    //             fontWeight: FontWeight.bold
+                    //         ),
+                    //       ),
+                          // SizedBox(height: 8),
+                          // _buildFilterPeriodChips(),
+                      //   ],
+                      // )
                   ],
                 ),
               ),
@@ -382,7 +306,7 @@ class _SearchNotesFilterButtonState extends ConsumerState<_SearchNotesFilterButt
   }
 
   Wrap _buildFilterTypeChips() {
-    final filterType = ref.watch(_filterNotesTypeProvider);
+    final filterType = ref.watch(filterNotesTypeProvider);
 
     return Wrap(
         runSpacing: 8,
@@ -390,67 +314,67 @@ class _SearchNotesFilterButtonState extends ConsumerState<_SearchNotesFilterButt
         children: [
           _SearchFilterChip(
             onTap: () {
-              _changeFilterType(_FilterNotesType.popular);
+              _changeFilterType(FilterNotesType.popular);
             },
             label: 'Популярное',
-            selected: filterType == _FilterNotesType.popular,
+            selected: filterType == FilterNotesType.popular,
           ),
           _SearchFilterChip(
             onTap: () {
-              _changeFilterType(_FilterNotesType.latest);
+              _changeFilterType(FilterNotesType.latest);
             },
             label: 'Последние',
-            selected: filterType == _FilterNotesType.latest,
+            selected: filterType == FilterNotesType.latest,
           ),
         ]
     );
   }
 
-  Wrap _buildFilterPeriodChips() {
-    final filterPeriod = ref.watch(_filterNotesPeriodProvider);
-
-    return Wrap(
-        runSpacing: 8,
-        spacing: 8,
-        children: [
-          _SearchFilterChip(
-            onTap: () {
-              _changeFilterPeriod(_FilterNotesPeriod.day);
-            },
-            label: 'Сутки',
-            selected: filterPeriod == _FilterNotesPeriod.day,
-          ),
-          _SearchFilterChip(
-            onTap: () {
-              _changeFilterPeriod(_FilterNotesPeriod.week);
-            },
-            label: 'Неделя',
-            selected: filterPeriod == _FilterNotesPeriod.week,
-          ),
-          _SearchFilterChip(
-            onTap: () {
-              _changeFilterPeriod(_FilterNotesPeriod.month);
-            },
-            label: 'Месяц',
-            selected: filterPeriod == _FilterNotesPeriod.month,
-          ),
-          _SearchFilterChip(
-            onTap: () {
-              _changeFilterPeriod(_FilterNotesPeriod.year);
-            },
-            label: 'Год',
-            selected: filterPeriod == _FilterNotesPeriod.year,
-          ),
-          _SearchFilterChip(
-            onTap: () {
-              _changeFilterPeriod(_FilterNotesPeriod.allTime);
-            },
-            label: 'Всё время',
-            selected: filterPeriod == _FilterNotesPeriod.allTime,
-          ),
-        ]
-    );
-  }
+  // Wrap _buildFilterPeriodChips() {
+  //   // final filterPeriod = ref.watch(filterNotesPeriodProvider);
+  //
+  //   return Wrap(
+  //       runSpacing: 8,
+  //       spacing: 8,
+  //       children: [
+  //         _SearchFilterChip(
+  //           onTap: () {
+  //             _changeFilterPeriod(FilterNotesPeriod.day);
+  //           },
+  //           label: 'Сутки',
+  //           selected: filterPeriod == FilterNotesPeriod.day,
+  //         ),
+  //         _SearchFilterChip(
+  //           onTap: () {
+  //             _changeFilterPeriod(FilterNotesPeriod.week);
+  //           },
+  //           label: 'Неделя',
+  //           selected: filterPeriod == FilterNotesPeriod.week,
+  //         ),
+  //         _SearchFilterChip(
+  //           onTap: () {
+  //             _changeFilterPeriod(FilterNotesPeriod.month);
+  //           },
+  //           label: 'Месяц',
+  //           selected: filterPeriod == FilterNotesPeriod.month,
+  //         ),
+  //         _SearchFilterChip(
+  //           onTap: () {
+  //             _changeFilterPeriod(FilterNotesPeriod.year);
+  //           },
+  //           label: 'Год',
+  //           selected: filterPeriod == FilterNotesPeriod.year,
+  //         ),
+  //         _SearchFilterChip(
+  //           onTap: () {
+  //             _changeFilterPeriod(FilterNotesPeriod.allTime);
+  //           },
+  //           label: 'Всё время',
+  //           selected: filterPeriod == FilterNotesPeriod.allTime,
+  //         ),
+  //       ]
+  //   );
+  // }
 }
 
 class _SearchFilterChip extends StatelessWidget {

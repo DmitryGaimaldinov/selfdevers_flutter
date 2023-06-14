@@ -1,20 +1,30 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:selfdevers/api/notes/dto/note_dto.dart';
 import 'package:selfdevers/api/users/dto/user_dto.dart';
 import 'package:selfdevers/profile/related_user_fields.dart';
 
-import 'user.dart';
+part 'profile_state.freezed.dart';
 
-abstract class ProfileState {}
+@freezed
+class ProfileState with _$ProfileState {
+  factory ProfileState.loading() = _Loading;
 
-class ProfileStateLoading extends ProfileState {}
+  factory ProfileState.notFound() = _NotFound;
 
-
-class ProfileStateNotFound extends ProfileState {}
-
-class ProfileStateLoaded extends ProfileState {
-  final UserDto userDto;
-
-  ProfileStateLoaded(this.userDto);
+  factory ProfileState.loaded({ required UserDto userDto }) = _Loaded;
 }
+
+// abstract class ProfileState {}
+//
+// class ProfileStateLoading extends ProfileState {}
+//
+// class ProfileStateNotFound extends ProfileState {}
+//
+// class ProfileStateLoaded extends ProfileState {
+//   final UserDto userDto;
+//
+//   ProfileStateLoaded(this.userDto);
+// }
 
 // Здесь будет кнопка подписки/запроса.
 // Нужно учитывать, вошёл ли пользователь.

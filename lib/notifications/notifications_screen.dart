@@ -15,18 +15,19 @@ import 'package:selfdevers/widgets/my_divider.dart';
 
 import '../auth/show_login_dialog.dart';
 
-class NotificationsScreen extends StatefulWidget {
+class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
 
   @override
-  State<NotificationsScreen> createState() => _NotificationsScreenState();
+  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   @override
   void initState() {
     super.initState();
+    ref.read(notificationsStateProvider.notifier).markAsViewed();
   }
 
   @override

@@ -122,10 +122,11 @@ class EditProfileNotifier extends StateNotifier<EditProfileState> {
             }
         );
 
-        final user = User.fromJson(response.data);
+        final user = UserDto.fromJson(response.data);
+        // _ref.read(profileStateProvider(user.userTag).notifier).setUserData(user);
 
-        _ref.read(profileStateProvider(user.userTag).notifier).loadUser();
-
+        state.editedUserDto = user;
+        print('profile screen editedUserDto: ${state.editedUserDto}');
         state = state.copyWith(saveState: EditProfileSaveState.saved);
       } on DioError catch (e) {
         if (e.type == DioErrorType.badResponse) {

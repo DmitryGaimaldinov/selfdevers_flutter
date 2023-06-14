@@ -27,10 +27,10 @@ class ApiServices {
   // static String userById(int id) => userByTag('id$id');
   static String getUser = 'users/get-user';
 
-  static String updateAvatar = 'photos/update-avatar';
-  static String updateBackground = 'photos/update-background';
-  static String removeAvatar = 'photos/remove-avatar';
-  static String removeBackground = 'photos/remove-background';
+  static String updateAvatar = 'users/update-avatar';
+  static String updateBackground = 'users/update-background';
+  static String removeAvatar = 'users/remove-avatar';
+  static String removeBackground = 'users/remove-background';
   static String updateProfile = 'users/update-profile';
 
   // TODO: А что если перенести эти методы в user/follow???????

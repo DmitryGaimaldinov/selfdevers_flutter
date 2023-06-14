@@ -48,19 +48,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
       //   child: SearchScreen(),
       // ),
       appBar: AppBar(
-        leading:  ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: 40,
-            ),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (_) => ProfileScreen(userTag: 'id0'),
-                ));
-              },
-              child: CurrentUserAvatar(),
-            )
-        ),
         title: const Text('Лента'),
         centerTitle: true,
         // leading: IconButton(
@@ -69,63 +56,52 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
         //   },
         //   icon: Icon(Icons.menu),
         // ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              ref.read(authStateProvider.notifier).logout();
-            },
-            icon: Icon(Icons.exit_to_app)
-          ),
-        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Consumer(
-          builder: (context, ref, _) {
-            final authState = ref.watch(authStateProvider);
-            if (authState is AuthStateLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (authState is AuthStateNotLoggedIn) {
-              return Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FlickerNeonText(
-                      text: 'Войдите, чтобы просматривать подписки',
-                      textSize: Theme.of(context).textTheme.headlineSmall!.fontSize ?? 20,
-                      textColor: Colors.white,
-                      spreadColor: Theme.of(context).colorScheme.primary,
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 32),
-                    NeonOutlinedButton(
-                      onPressed: () => showLoginDialog(context),
-                      child: Text('Войти'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final feedState = ref.watch(feedNotifierProvider);
-            return feedState.when(
-              initialing: () => const Center(child: CircularProgressIndicator()),
-              error: () => const Center(child: Text('Ошибка')),
-              loaded: (notes) {
-                return ListView.builder(
-                  controller: widget.scrollController,
-                  itemCount: notes.length,
-                  itemBuilder: (_, index) {
-                    return CenterConstrained(
-                      child: NoteTile(note: notes[index]),
-                    );
-                  },
-                );
-              },
+      body: Consumer(
+        builder: (context, ref, _) {
+          final authState = ref.watch(authStateProvider);
+          if (authState is AuthStateLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (authState is AuthStateNotLoggedIn) {
+            return Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FlickerNeonText(
+                    text: 'Войдите, чтобы просматривать подписки',
+                    textSize: Theme.of(context).textTheme.headlineSmall!.fontSize ?? 20,
+                    textColor: Colors.white,
+                    spreadColor: Theme.of(context).colorScheme.primary,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 32),
+                  NeonOutlinedButton(
+                    onPressed: () => showLoginDialog(context),
+                    child: Text('Войти'),
+                  ),
+                ],
+              ),
             );
-          },
-        ),
+          }
+
+          final feedState = ref.watch(feedNotifierProvider);
+          return feedState.when(
+            initialing: () => const Center(child: CircularProgressIndicator()),
+            error: () => const Center(child: Text('Ошибка')),
+            loaded: (notes) {
+              return ListView.builder(
+                controller: widget.scrollController,
+                itemCount: notes.length,
+                itemBuilder: (_, index) {
+                  return CenterConstrained(
+                    child: NoteTile(note: notes[index]),
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
       floatingActionButton: ref.watch(showCreateNoteFabProvider)
           ? const CreateNoteFAB()

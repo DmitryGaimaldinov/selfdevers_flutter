@@ -149,16 +149,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await SecureStorage.instance.setAccessToken(null);
-    await SecureStorage.instance.setRefreshToken(null);
+    await Storage.instance.setAccessToken(null);
+    await Storage.instance.setRefreshToken(null);
 
     state = AuthStateNotLoggedIn();
     ref.read(wsApiProvider).refreshToken();
   }
 
   Future<void> _setAuthCredentials(AuthResultDto authResult) async {
-    await SecureStorage.instance.setAccessToken(authResult.accessToken);
-    await SecureStorage.instance.setRefreshToken(authResult.refreshToken);
+    await Storage.instance.setAccessToken(authResult.accessToken);
+    await Storage.instance.setRefreshToken(authResult.refreshToken);
   }
 }
 

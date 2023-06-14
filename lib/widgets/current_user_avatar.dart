@@ -16,26 +16,26 @@ import '../profile/widgets/user_avatar.dart';
 // });
 
 /// Виджет для отображения текущей аватарки пользователя в AppBar
-class CurrentUserAvatar extends ConsumerWidget {
-  const CurrentUserAvatar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final UserDto? user = ref.watch(currentUserProvider);
-
-    if (user == null) {
-      return SizedBox();
-    }
-
-    final ImageDto? avatar = user.avatar;
-    return Padding(
-        padding: const EdgeInsets.all(12),
-        child: UserAvatar(
-          imageProvider: (avatar?.url != null)
-              ? NetworkImage(avatar!.url)
-              : null,
-          blurhash: avatar?.blurhash,
-        )
-    );
-  }
-}
+// class CurrentUserAvatar extends ConsumerWidget {
+//   const CurrentUserAvatar({Key? key}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final UserDto? user = ref.watch(currentUserProvider);
+//
+//     if (user == null) {
+//       return SizedBox();
+//     }
+//
+//     final ImageDto? avatar = user.avatar;
+//     return Padding(
+//         padding: const EdgeInsets.all(12),
+//         child: UserAvatar(
+//           imageProvider: (avatar?.url != null)
+//               ? NetworkImage(avatar!.url)
+//               : null,
+//           blurhash: avatar?.blurhash,
+//         )
+//     );
+//   }
+// }

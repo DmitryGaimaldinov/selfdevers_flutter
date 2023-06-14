@@ -1,14 +1,22 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:selfdevers/api/notes/dto/note_dto.dart';
+import 'package:selfdevers/api/status_codes.dart';
 import 'package:selfdevers/api/ws_api.dart';
+import 'package:selfdevers/auth/show_login_dialog.dart';
+import 'package:selfdevers/note/note_screen.dart';
 import 'package:selfdevers/profile/screens/profile_screen.dart';
+import 'package:selfdevers/screens/error_screen.dart';
 import 'package:selfdevers/search/search_screen.dart';
+import 'package:selfdevers/settings/settings_screen.dart';
 import 'package:selfdevers/utils/my_custom_scroll_behavior.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -24,18 +32,40 @@ Sink<double> screenScrollDeltaSink = screenScrollDeltaController.sink;
 Stream<double> screenScrollDeltaStream = screenScrollDeltaController.stream;
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-  //   statusBarColor: lightColorScheme.background,
-  // ));
+  runZonedGuarded(() {
+    WidgetsFlutterBinding.ensureInitialized();
+    // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    //   statusBarColor: lightColorScheme.background,
+    // ));
 
-  initializeDateFormatting('ru');
+    initializeDateFormatting('ru');
 
-  final container = ProviderContainer();
+    final container = ProviderContainer();
 
-  await container.read(wsApiProvider).initialize();
+    container.read(wsApiProvider).initialize().then((_) {
+      runApp(UncontrolledProviderScope(container: container, child: const MyApp()));
+    });
+  }, (error, stackTrace) {
+    final context = _rootNavigatorKey.currentContext;
 
-  runApp(UncontrolledProviderScope(container: container, child: const MyApp()));
+    if (error is DioError) {
+      if (error.type == DioErrorType.badResponse) {
+        final response = error.response!;
+        switch (response.statusCode) {
+          case StatusCodes.unauthorized:
+            if (context != null) {
+              showLoginDialog(context);
+            } else {
+              Fluttertoast.showToast(msg: 'Авторизуйтесь');
+            }
+            break;
+          default:
+            Fluttertoast.showToast(msg: response.data['message']);
+            break;
+        }
+      }
+    }
+  });
 }
 
 
@@ -77,15 +107,40 @@ final _router = GoRouter(
         ),
         GoRoute(
           path: '/profile/:id',
-          builder: (context, state) => ProfileScreen(userTag: state.pathParameters['id']!),
+          builder: (context, state) {
+            if (state.pathParameters['id'] == null) {
+              return const ErrorScreen();
+            }
+
+            return ProfileScreen(userTag: state.pathParameters['id']!);
+          },
         ),
         GoRoute(
           path: '/search',
-          builder: (context, state) => SearchScreen(),
+          builder: (context, state) => const SearchScreen(),
         ),
         GoRoute(
           path: '/notifications',
-          builder: (context, state) => NotificationsScreen(),
+          builder: (context, state) => const NotificationsScreen(),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: '/note/:id',
+          builder: (context, state) {
+            final String? idString = state.pathParameters['id'];
+            if (idString == null || int.tryParse(idString) == null) {
+              return const ErrorScreen();
+            }
+
+            NoteDto? noteDto;
+            if (state.extra != null) {
+              noteDto = state.extra as NoteDto;
+            }
+            return NoteScreen(noteId: int.parse(idString), noteDto: noteDto);
+          },
         ),
       ]
     ),
@@ -197,23 +252,23 @@ class _MinimalHomeScreenState extends ConsumerState<MinimalHomeScreen> {
               return Scaffold(
                 bottomNavigationBar: isMobile
                     ? BottomNavigationBar(
-                  onTap: _onTap,
-                  currentIndex: _bottomBarSelectedIndex,
-                  items: [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'Лента',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.search),
-                      label: 'Поиск',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.notifications),
-                      label: 'Уведомления',
-                    ),
-                  ],
-                )
+                      onTap: _onTap,
+                      currentIndex: _bottomBarSelectedIndex,
+                      items: [
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.home),
+                          label: 'Лента',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.search),
+                          label: 'Поиск',
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.notifications),
+                          label: 'Уведомления',
+                        ),
+                      ],
+                    )
                     : null,
                 body: Row(
                   children: [

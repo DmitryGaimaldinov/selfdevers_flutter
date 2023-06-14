@@ -30,7 +30,7 @@ class UserValidator {
     if (tag.startsWith('id')) {
       int? idFromTag = int.tryParse(tag.substring(2));
       if (userId != idFromTag) {
-        return 'Недопустимый тэг пользователя. Можно только id$userId';
+        return 'Недопустимый тэг пользователя, начинающийся с id. Можно только id$userId';
       }
     }
 

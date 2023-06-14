@@ -1,3 +1,5 @@
+import 'package:selfdevers/api/users/dto/user_dto.dart';
+
 import '../profile/user.dart';
 
 abstract class FollowedListState {}
@@ -5,7 +7,7 @@ abstract class FollowedListState {}
 class FollowedListStateInitializing extends FollowedListState {}
 
 class FollowedListStateLoaded extends FollowedListState {
-  final List<User> followedUsers;
+  final List<UserDto> followedUsers;
 
   FollowedListStateLoaded({required this.followedUsers});
 }

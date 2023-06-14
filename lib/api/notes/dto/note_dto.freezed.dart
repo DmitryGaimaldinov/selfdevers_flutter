@@ -32,6 +32,7 @@ mixin _$NoteDto {
   bool get isLikedByMe => throw _privateConstructorUsedError;
   int get quoteCount => throw _privateConstructorUsedError;
   NoteDto? get quotedNoteDto => throw _privateConstructorUsedError;
+  int get commentCount => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -55,7 +56,8 @@ abstract class $NoteDtoCopyWith<$Res> {
       int likeCount,
       bool isLikedByMe,
       int quoteCount,
-      NoteDto? quotedNoteDto});
+      NoteDto? quotedNoteDto,
+      int commentCount});
 
   $UserDtoCopyWith<$Res> get creator;
   $NoteDtoCopyWith<$Res>? get quotedNoteDto;
@@ -86,6 +88,7 @@ class _$NoteDtoCopyWithImpl<$Res, $Val extends NoteDto>
     Object? isLikedByMe = null,
     Object? quoteCount = null,
     Object? quotedNoteDto = freezed,
+    Object? commentCount = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -136,6 +139,10 @@ class _$NoteDtoCopyWithImpl<$Res, $Val extends NoteDto>
           ? _value.quotedNoteDto
           : quotedNoteDto // ignore: cast_nullable_to_non_nullable
               as NoteDto?,
+      commentCount: null == commentCount
+          ? _value.commentCount
+          : commentCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 
@@ -179,7 +186,8 @@ abstract class _$$_NoteDtoCopyWith<$Res> implements $NoteDtoCopyWith<$Res> {
       int likeCount,
       bool isLikedByMe,
       int quoteCount,
-      NoteDto? quotedNoteDto});
+      NoteDto? quotedNoteDto,
+      int commentCount});
 
   @override
   $UserDtoCopyWith<$Res> get creator;
@@ -209,6 +217,7 @@ class __$$_NoteDtoCopyWithImpl<$Res>
     Object? isLikedByMe = null,
     Object? quoteCount = null,
     Object? quotedNoteDto = freezed,
+    Object? commentCount = null,
   }) {
     return _then(_$_NoteDto(
       id: null == id
@@ -259,6 +268,10 @@ class __$$_NoteDtoCopyWithImpl<$Res>
           ? _value.quotedNoteDto
           : quotedNoteDto // ignore: cast_nullable_to_non_nullable
               as NoteDto?,
+      commentCount: null == commentCount
+          ? _value.commentCount
+          : commentCount // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -278,7 +291,8 @@ class _$_NoteDto implements _NoteDto {
       required this.likeCount,
       required this.isLikedByMe,
       required this.quoteCount,
-      this.quotedNoteDto})
+      this.quotedNoteDto,
+      required this.commentCount})
       : _images = images;
 
   factory _$_NoteDto.fromJson(Map<String, dynamic> json) =>
@@ -314,10 +328,12 @@ class _$_NoteDto implements _NoteDto {
   final int quoteCount;
   @override
   final NoteDto? quotedNoteDto;
+  @override
+  final int commentCount;
 
   @override
   String toString() {
-    return 'NoteDto(id: $id, text: $text, images: $images, isQuoted: $isQuoted, isEdited: $isEdited, creator: $creator, creationDate: $creationDate, isMyNote: $isMyNote, likeCount: $likeCount, isLikedByMe: $isLikedByMe, quoteCount: $quoteCount, quotedNoteDto: $quotedNoteDto)';
+    return 'NoteDto(id: $id, text: $text, images: $images, isQuoted: $isQuoted, isEdited: $isEdited, creator: $creator, creationDate: $creationDate, isMyNote: $isMyNote, likeCount: $likeCount, isLikedByMe: $isLikedByMe, quoteCount: $quoteCount, quotedNoteDto: $quotedNoteDto, commentCount: $commentCount)';
   }
 
   @override
@@ -344,7 +360,9 @@ class _$_NoteDto implements _NoteDto {
             (identical(other.quoteCount, quoteCount) ||
                 other.quoteCount == quoteCount) &&
             (identical(other.quotedNoteDto, quotedNoteDto) ||
-                other.quotedNoteDto == quotedNoteDto));
+                other.quotedNoteDto == quotedNoteDto) &&
+            (identical(other.commentCount, commentCount) ||
+                other.commentCount == commentCount));
   }
 
   @JsonKey(ignore: true)
@@ -362,7 +380,8 @@ class _$_NoteDto implements _NoteDto {
       likeCount,
       isLikedByMe,
       quoteCount,
-      quotedNoteDto);
+      quotedNoteDto,
+      commentCount);
 
   @JsonKey(ignore: true)
   @override
@@ -391,7 +410,8 @@ abstract class _NoteDto implements NoteDto {
       required final int likeCount,
       required final bool isLikedByMe,
       required final int quoteCount,
-      final NoteDto? quotedNoteDto}) = _$_NoteDto;
+      final NoteDto? quotedNoteDto,
+      required final int commentCount}) = _$_NoteDto;
 
   factory _NoteDto.fromJson(Map<String, dynamic> json) = _$_NoteDto.fromJson;
 
@@ -419,6 +439,8 @@ abstract class _NoteDto implements NoteDto {
   int get quoteCount;
   @override
   NoteDto? get quotedNoteDto;
+  @override
+  int get commentCount;
   @override
   @JsonKey(ignore: true)
   _$$_NoteDtoCopyWith<_$_NoteDto> get copyWith =>

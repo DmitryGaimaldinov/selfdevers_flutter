@@ -9,12 +9,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:selfdevers/api/api.dart';
+import 'package:selfdevers/auth/auth_notifier.dart';
+import 'package:selfdevers/auth/auth_state.dart';
 import 'package:selfdevers/feed/feed_screen.dart';
+import 'package:selfdevers/feed/widgets/current_user_icon.dart';
+import 'package:selfdevers/home/widgets/current_user_in_rail.dart';
 import 'package:selfdevers/home/widgets/notifications_icon.dart';
 import 'package:selfdevers/main.dart';
 import 'package:selfdevers/notifications/notifications_screen.dart';
 import 'package:selfdevers/profile/screens/profile_screen.dart';
 import 'package:selfdevers/search/search_screen.dart';
+import 'package:selfdevers/widgets/current_user_avatar.dart';
 
 import '../profile/user.dart';
 import '../styles/color-themes.dart';
@@ -42,6 +47,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _onTap(int index) {
+    print('navigation on tap index: $index');
     switch (index) {
       case 0:
         context.go('/feed');
@@ -51,6 +57,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         break;
       case 2:
         context.go('/notifications');
+        break;
+      case 3:
+        context.go('/settings');
+        break;
+      case 4:
+        context.go('/profile/${ref.read(currentUserProvider)!.userTag}');
         break;
     }
   }
@@ -65,6 +77,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     if (location.startsWith('/notifications')) {
       return 2;
+    }
+    if (location.startsWith('/settings')) {
+      return 3;
+    }
+    final currentUser = ref.watch(currentUserProvider);
+    if (currentUser != null && location.startsWith('/profile/${currentUser.userTag}')) {
+      return 4;
     }
     return 0;
   }
@@ -154,19 +173,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   labelType: !isDesktop
                                       ? NavigationRailLabelType.selected
                                       : null,
-                                  leading: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: const [
-                                      SizedBox(
-                                        height: 8,
-                                      ),
-                                      CircleAvatar(
-                                        radius: 20,
-                                        child: Icon(Icons.person),
-                                      ),
-                                    ],
-                                  ),
                                   destinations: [
                                     NavigationRailDestination(
                                       icon: Icon(Icons.home),
@@ -180,6 +186,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       icon: NotificationsIcon(),
                                       label: Text('Уведомления'),
                                     ),
+                                    NavigationRailDestination(
+                                      icon: Icon(Icons.settings),
+                                      label: Text('Настройки'),
+                                    ),
+                                    if (ref.watch(authStateProvider) is AuthStateLoggedIn)
+                                      NavigationRailDestination(
+                                        icon: CurrentUserIcon(),
+                                        label: Text('Профиль'),
+                                      ),
                                   ],
                                 ),
                               ),
@@ -233,6 +248,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: NotificationsIcon(),
                   label: 'Уведомления',
                 ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: 'Настройки',
+                ),
+                if (ref.watch(authStateProvider) is AuthStateLoggedIn)
+                  BottomNavigationBarItem(
+                    icon: CurrentUserIcon(),
+                    label: 'Профиль',
+                  ),
               ],
             ),
           ],

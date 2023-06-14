@@ -7,6 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:ui' as ui;
 import 'package:path/path.dart' as path;
+import 'package:selfdevers/main.dart';
+import 'package:selfdevers/widgets/frosted_container.dart';
+import 'package:selfdevers/widgets/neon_outlined_button.dart';
+import 'package:selfdevers/widgets/show_adaptive_dialog.dart';
 
 class MemoryNamedImage {
   final String filename;
@@ -20,10 +24,10 @@ class MemoryNamedImage {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MemoryNamedImage &&
-          runtimeType == other.runtimeType &&
-          filename == other.filename &&
-          imageBytes == other.imageBytes;
+          other is MemoryNamedImage &&
+              runtimeType == other.runtimeType &&
+              filename == other.filename &&
+              imageBytes == other.imageBytes;
 
   @override
   int get hashCode => filename.hashCode ^ imageBytes.hashCode;
@@ -46,46 +50,87 @@ Future<MemoryNamedImage?> pickAndCropImage({
       aspectRatio: aspectRatio,
     );
 
-    final bool? isPicked = await showDialog<bool>(
-        context: context,
-        builder: (_) {
-          return Center(
-            child: Container(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                bottom: 16,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppBar(
-                    title: const Text('Редактирование изображения'),
-                    actions: [
-                      FilledButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        child: const Text('Применить'),
-                      )
-                    ],
+    final bool? isPicked = await showAdaptiveDialog<bool>(
+      context: context,
+      screen: Scaffold(
+        body: FrostedContainer(
+          child: Column(
+            children: [
+              AppBar(
+                title: Text('Редактирование изображения'),
+                backgroundColor: Colors.transparent,
+                actions: [
+                  NeonOutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Text('Применить'),
                   ),
-                  CropImage(
+                  SizedBox(width: 16),
+                ],
+              ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
+                  child: CropImage(
                     controller: controller,
                     image: Image.network(
                       file.path,
                       fit: BoxFit.cover,
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          );
-        });
+            ],
+          ),
+        ),
+      )
+    );
+
+    // final bool? isPicked = await showDialog<bool>(
+    //     context: context,
+    //     builder: (_) {
+    //       return CenterConstrained(
+    //         child: Container(
+    //           padding: const EdgeInsets.only(
+    //             left: 16,
+    //             right: 16,
+    //             bottom: 16,
+    //           ),
+    //           decoration: BoxDecoration(
+    //             color: Colors.white,
+    //             borderRadius: BorderRadius.circular(8),
+    //           ),
+    //           child: Column(
+    //             mainAxisSize: MainAxisSize.min,
+    //             children: [
+    //               AppBar(
+    //                 title: const Text('Редактирование изображения'),
+    //                 actions: [
+    //                   FilledButton(
+    //                     onPressed: () {
+    //                       Navigator.of(context).pop(true);
+    //                     },
+    //                     child: const Text('Применить'),
+    //                   )
+    //                 ],
+    //               ),
+    //               CropImage(
+    //                 controller: controller,
+    //                 image: Image.network(
+    //                   file.path,
+    //                   fit: BoxFit.cover,
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //       );
+    //     });
 
     if (isPicked == true) {
       ui.Image bitmap = await controller.croppedBitmap();

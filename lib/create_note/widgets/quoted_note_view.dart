@@ -36,17 +36,11 @@ class QuotedNoteView extends StatelessWidget {
             borderRadius: borderRadius,
           ),
           child: Padding(
-            padding: const EdgeInsets.only(
-                left: 16, right: 16, top: 16, bottom: 8),
+            padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UserAvatar(
-                  imageProvider: (note.creator.avatar != null)
-                      ? NetworkImage(note.creator.avatar!.url)
-                      : null,
-                  blurhash: note.creator.avatar?.blurhash,
-                ),
+                UserAvatar.network(note.creator.avatar),
                 SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -70,9 +64,17 @@ class QuotedNoteView extends StatelessWidget {
                             ),
                             const WidgetSpan(child: SizedBox(width: 4)),
                             TextSpan(
-                                text: DateFormat.d()
-                                    .format(note.creationDate),
-                                style: TextStyles.light2),
+                                style: TextStyles.light2,
+                                children: [
+                                  TextSpan(
+                                    text: DateFormat.yMMMMd('ru').format(note.creationDate),
+                                  ),
+                                  TextSpan(text: ' в '),
+                                  TextSpan(
+                                    text: '${DateFormat.Hm().format(note.creationDate)}',
+                                  ),
+                                ]
+                            ),
                           ])),
                       Text(
                         note.text,

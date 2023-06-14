@@ -18,12 +18,12 @@ class TokenRepository {
   Future<String?> loadAccessToken() async {
     print('start loading access token');
     // get token from secure storage
-    final accessToken = await SecureStorage.instance.getAccessToken();
+    final accessToken = await Storage.instance.getAccessToken();
     if (accessToken != null && !JwtDecoder.isExpired(accessToken)) {
       return accessToken;
     }
 
-    final refreshToken = await SecureStorage.instance.getRefreshToken();
+    final refreshToken = await Storage.instance.getRefreshToken();
     if (refreshToken == null) {
       return null;
     }
@@ -38,8 +38,8 @@ class TokenRepository {
       final newAccessToken = response.data['accessToken'];
       final newRefreshToken = response.data['refreshToken'];
 
-      await SecureStorage.instance.setAccessToken(newAccessToken);
-      await SecureStorage.instance.setRefreshToken(newRefreshToken);
+      await Storage.instance.setAccessToken(newAccessToken);
+      await Storage.instance.setRefreshToken(newRefreshToken);
 
       return newAccessToken;
     } on DioError catch (e) {
@@ -49,8 +49,8 @@ class TokenRepository {
           // TODO: Выводить сообщение о том, что время предыдущей сесси истекло
           // Т.е. выводить response.data['message']
 
-          await SecureStorage.instance.setAccessToken(null);
-          await SecureStorage.instance.setRefreshToken(null);
+          await Storage.instance.setAccessToken(null);
+          await Storage.instance.setRefreshToken(null);
           return null;
         }
       }

@@ -9,5 +9,6 @@ class SendNoteDto with _$SendNoteDto {
     required String text,
     required List<XFile> imageXFiles,
     required int? quotedNoteId,
+    required int? parentNoteId,
   }) = _SendNoteDto;
 }

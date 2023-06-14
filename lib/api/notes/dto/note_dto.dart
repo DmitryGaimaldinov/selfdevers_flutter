@@ -20,6 +20,7 @@ class NoteDto with _$NoteDto {
     required bool isLikedByMe,
     required int quoteCount,
     NoteDto? quotedNoteDto,
+    required int commentCount,
   }) = _NoteDto;
 
   factory NoteDto.fromJson(Map<String, dynamic> json) =>

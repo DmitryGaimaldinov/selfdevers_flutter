@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:selfdevers/auth/auth_notifier.dart';
 import 'package:selfdevers/repositories/token_repository.dart';
 
-const BASE_URL = 'http://127.0.0.1:3000/';
+const _LOCAL_URL = 'http://127.0.0.1:3000/';
+const _NETWORK_URL = 'http://194.58.107.53:3000/';
+
+const BASE_URL = _LOCAL_URL;
 
 final apiProvider = Provider<Api>((ref) {
   return Api._(ref);

@@ -40,7 +40,6 @@ final emailErrorTextProvider = StateProvider<String?>((ref) {
   return null;
 });
 
-
 // PASSWORD
 final passwordErrorTextProvider = StateProvider<String?>((ref) {
   return null;
@@ -49,7 +48,6 @@ final passwordErrorTextProvider = StateProvider<String?>((ref) {
 final passwordInputProvider = StateProvider<String>((ref) {
   return '';
 });
-
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -78,7 +76,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     _passwordController = TextEditingController()
       ..addListener(() {
-        ref.read(passwordInputProvider.notifier).state = _passwordController.text;
+        ref.read(passwordInputProvider.notifier).state =
+            _passwordController.text;
       });
   }
 
@@ -111,7 +110,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     // Валидно ли введён пароль
     final password = ref.read(passwordInputProvider).trim();
-    final passwordRegExp = RegExp('((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*');
+    final passwordRegExp =
+        RegExp('((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*');
     String? passwordErrorText;
     if (password.length < 4 || password.length > 20) {
       passwordErrorText = 'Пароль должен быть не меньше 4 символов';
@@ -123,12 +123,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (nameErrorText == null &&
         passwordErrorText == null &&
         emailErrorText == null) {
-
       try {
-        await ref.read(authStateProvider.notifier).register(
-            name: name,
-            email: email,
-            password: password);
+        await ref
+            .read(authStateProvider.notifier)
+            .register(name: name, email: email, password: password);
 
         Navigator.pop(context);
       } on AuthException catch (e) {
@@ -169,7 +167,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   child: Column(
                     children: [
                       Spacer(),
-                      LoginTitleText('Станьте частью сообщества саморазвиванцев!'),
+                      LoginTitleText(
+                          'Станьте частью сообщества саморазвиванцев!'),
                       Spacer(flex: 2),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -190,7 +189,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               builder: (_, ref, __) {
                                 return PasswordTextField(
                                   controller: _passwordController,
-                                  errorText: ref.watch(passwordErrorTextProvider),
+                                  errorText:
+                                      ref.watch(passwordErrorTextProvider),
                                 );
                               },
                             ),
@@ -211,7 +211,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         noActionText: 'Уже имеете аккаунт?',
                         actionText: 'Войти',
                         onActionTextTap: () {
-                          ref.read(loginStateProvider.notifier).state = LoginState.login;
+                          ref.read(loginStateProvider.notifier).state =
+                              LoginState.login;
                         },
                       ),
                       SizedBox(height: 16),
@@ -245,5 +246,3 @@ class _NameTextField extends ConsumerWidget {
     );
   }
 }
-
-

@@ -19,15 +19,18 @@ class PhotosService {
     for (final image in memoryNamedImages) {
       debugPrint('filename: ${image.filename}');
       formData.files.add(
-        MapEntry('images', MultipartFile.fromBytes(image.imageBytes, filename: image.filename)),
+        MapEntry(
+            'images',
+            MultipartFile.fromBytes(image.imageBytes,
+                filename: image.filename)),
       );
     }
 
     final response = await _ref.read(apiProvider).post(
-      'photos/upload-images',
-      formData,
-      cancelToken,
-    );
+          'photos/upload-images',
+          formData,
+          cancelToken,
+        );
 
     debugPrint('${response.data}');
 

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:selfdevers/api/notes/dto/create_note_dto.dart';
+import 'package:selfdevers/api/notes/dto/note_dto.dart';
 import 'package:selfdevers/api/notes/notes_service.dart';
 import 'package:selfdevers/api/photos/photos_service.dart';
 import 'package:selfdevers/create_note/models/send_note_dto.dart';
@@ -35,7 +36,7 @@ class CreateNoteNotifier extends StateNotifier<CreateNoteState> {
 
   Future<void> send({required List<SendNoteDto> sendNoteDtos}) async {
     state = state.copyWith(isSending: true);
-    int? parentId;
+    // int? parentId;
 
     for (final dto in sendNoteDtos) {
       if (!mounted) {
@@ -63,16 +64,17 @@ class CreateNoteNotifier extends StateNotifier<CreateNoteState> {
 
       // Загружаем пост на сервер
       _cancelToken = CancelToken();
-      final int noteId = await _ref.read(notesServiceProvider).createNote(
+      final NoteDto noteDto = await _ref.read(notesServiceProvider).createNote(
             CreateNoteDto(
               text: dto.text,
-              parentId: parentId,
+              // parentId: parentId,
               quotedNoteId: dto.quotedNoteId,
               imageIds: imageIds,
+              parentId: dto.parentNoteId,
             ),
             cancelToken: _cancelToken,
           );
-      parentId = noteId;
+      // parentId = noteDto.id;
       if (!mounted) {
         break;
       }

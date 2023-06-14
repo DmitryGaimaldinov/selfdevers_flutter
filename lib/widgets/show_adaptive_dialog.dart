@@ -4,54 +4,54 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:html_editor_enhanced/utils/shims/dart_ui_real.dart';
 import 'package:selfdevers/main.dart';
 
-
-Future<T> showAdaptiveDialog<T>({
-  required BuildContext context,
-  required Widget screen
-}) async {
-  return await Navigator.of(context).push(PageRouteBuilder(
+Future<T?> showAdaptiveDialog<T>(
+    {required BuildContext context, required Widget screen}) async {
+  return await Navigator.of(context).push<T>(PageRouteBuilder(
     fullscreenDialog: true,
     opaque: false,
     barrierDismissible: true,
-    pageBuilder: (context, _, __) => Consumer(
-      builder: (context, ref, _) {
-        final isMobile = ref.watch(isMobileModeProvider);
+    pageBuilder: (context, _, __) => Consumer(builder: (context, ref, _) {
+      final isMobile = ref.watch(isMobileModeProvider);
 
-        return ClipRect(
-          child: BackdropFilter(
-            blendMode: BlendMode.srcIn,
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: CenterConstrained(
-              child: Padding(
-                padding: isMobile ? EdgeInsets.zero : EdgeInsets.all(64),
-                child: Container(
-                  decoration: isMobile ? null : BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      for(double i = 1; i < 5; i++)
-                        BoxShadow(
-                          spreadRadius: -1,
-                          color: Theme.of(context).primaryColor.withOpacity(0.8),
-                          blurRadius: 3 * i,
-                          blurStyle: BlurStyle.outer,
-                        ),
-                    ]
-                  ),
-                  child: ClipRRect(
-                    borderRadius: isMobile ? BorderRadius.circular(0) : BorderRadius.circular(24),
-                    child: Theme(
+      return ClipRect(
+        child: BackdropFilter(
+          blendMode: BlendMode.srcIn,
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: CenterConstrained(
+            child: Padding(
+              padding: isMobile ? EdgeInsets.zero : EdgeInsets.all(64),
+              child: Container(
+                decoration: isMobile
+                    ? null
+                    : BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                            for (double i = 1; i < 5; i++)
+                              BoxShadow(
+                                spreadRadius: -1,
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.8),
+                                blurRadius: 3 * i,
+                                blurStyle: BlurStyle.outer,
+                              ),
+                          ]),
+                child: ClipRRect(
+                  borderRadius: isMobile
+                      ? BorderRadius.circular(0)
+                      : BorderRadius.circular(24),
+                  child: Theme(
                       data: Theme.of(context).copyWith(
-                          scaffoldBackgroundColor: isMobile ? null : Colors.transparent),
-                      child: screen
-                    ),
-                  ),
+                          scaffoldBackgroundColor: isMobile ? null : Colors.transparent,
+                      ),
+                      child: screen),
                 ),
               ),
             ),
           ),
-        );
-      }
-    ),
+        ),
+      );
+    }),
   ));
 }
 

@@ -23,6 +23,7 @@ _$_NoteDto _$$_NoteDtoFromJson(Map<String, dynamic> json) => _$_NoteDto(
       quotedNoteDto: json['quotedNoteDto'] == null
           ? null
           : NoteDto.fromJson(json['quotedNoteDto'] as Map<String, dynamic>),
+      commentCount: json['commentCount'] as int,
     );
 
 Map<String, dynamic> _$$_NoteDtoToJson(_$_NoteDto instance) =>
@@ -39,4 +40,5 @@ Map<String, dynamic> _$$_NoteDtoToJson(_$_NoteDto instance) =>
       'isLikedByMe': instance.isLikedByMe,
       'quoteCount': instance.quoteCount,
       'quotedNoteDto': instance.quotedNoteDto,
+      'commentCount': instance.commentCount,
     };

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:selfdevers/api/users/dto/user_dto.dart';
 import 'package:selfdevers/profile/user_validator.dart';
 
 import '../profile/pick_and_crop_image.dart';
@@ -27,6 +28,7 @@ class EditProfileState {
   String? nameErrorText;
   String? descriptionErrorText;
   String? tagErrorText;
+  UserDto? editedUserDto;
 
   EditProfileState({
     required this.name,
@@ -43,6 +45,7 @@ class EditProfileState {
     this.nameErrorText,
     this.descriptionErrorText,
     this.tagErrorText,
+    this.editedUserDto,
   });
 
   EditProfileState copyWith({
@@ -69,6 +72,7 @@ class EditProfileState {
       nameErrorText: nameErrorText,
       descriptionErrorText: descriptionErrorText,
       tagErrorText: tagErrorText,
+      editedUserDto: editedUserDto,
     );
   }
 
@@ -162,7 +166,8 @@ class EditProfileState {
           newBackgroundData == other.newBackgroundData &&
           nameErrorText == other.nameErrorText &&
           descriptionErrorText == other.descriptionErrorText &&
-          tagErrorText == other.tagErrorText;
+          tagErrorText == other.tagErrorText &&
+          editedUserDto == other.editedUserDto;
 
   @override
   int get hashCode =>
@@ -179,7 +184,8 @@ class EditProfileState {
       newBackgroundData.hashCode ^
       nameErrorText.hashCode ^
       descriptionErrorText.hashCode ^
-      tagErrorText.hashCode;
+      tagErrorText.hashCode ^
+      editedUserDto.hashCode;
 
   @override
   String toString() {

@@ -14,6 +14,7 @@ import 'package:selfdevers/api/api_services.dart';
 import 'package:selfdevers/main.dart';
 import 'package:selfdevers/screens/crop_image_screen.dart';
 import 'package:selfdevers/profile/pick_and_crop_image.dart';
+import 'package:selfdevers/utils/lower_case_text_input_formatter.dart';
 import 'package:selfdevers/utils/no_whitespaces_text_input_formatter.dart';
 
 import '../api/status_codes.dart';
@@ -85,60 +86,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _saveChanges() async {
-    // Сохраняем аватарку.
-    // TODO: При сохранении аватарки возвращается url.
-    // Нужно этот url сохранить в widget.user и
-    // currentUserProvider
-    // if (_pickedAvatarImageData != null) {
-    //   final response = await ref.read(apiProvider).post(
-    //     ApiServices.updateAvatar,
-    //     FormData.fromMap({
-    //       'file': MultipartFile.fromBytes(
-    //         _avatarImageBytes!,
-    //         filename: _avatarImageName,
-    //       )
-    //     }),
-    //   );
-    //   if (response.statusCode == StatusCodes.created) {
-    //     print('response.data[imageUrl]: ${response.data['imageUrl']}');
-    //     widget.user.avatarUrl = response.data['imageUrl'];
-    //   }
-    // }
-    //
-    // Сохраняем задний фон
-    // if (_pickedBackgroundImageData != null) {
-    //   final response = await ref.read(apiProvider).post(
-    //     ApiServices.updateBackground,
-    //     FormData.fromMap({
-    //       'file': MultipartFile.fromBytes(
-    //         _backgroundImageBytes!,
-    //         filename: _backgroundImageName,
-    //       )
-    //     }),
-    //   );
-    //   if (response.statusCode == StatusCodes.created) {
-    //     print('response.data[imageUrl]: ${response.data['imageUrl']}');
-    //     widget.user.backgroundUrl = response.data['imageUrl'];
-    //   }
-    // }
-    //
-    // Сохраняем остальные изменения
-    //
-    //
-    //
-    // Navigator.of(context).pop();
-  }
-
   @override
   Widget build(BuildContext context) {
-    // TODO: Всё оптимизировать. Разбить на отдельные виджеты
-    // и использовать select
-
     final editProfileState =
         ref.watch(editProfileNotifierProvider(widget.user));
     if (editProfileState.saveState == EditProfileSaveState.saved) {
-      Navigator.of(context).pop();
+      print('edit profile screen editedUserDto: ${editProfileState.editedUserDto}');
+      Navigator.of(context).pop(editProfileState.editedUserDto);
     }
 
     print('editProfileState reloaded: ${editProfileState}');
@@ -359,16 +313,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           controller: _tagController,
                           inputFormatters: [
                             NoWhitespacesTextInputFormatter(),
+                            LowerCaseTextInputFormatter(),
                           ],
                         ),
                         SizedBox(height: 8),
-                        _ProfilePrivacySwitch(
-                          initialValue: editProfileState.isPrivate,
-                          onChanged: (newValue) {
-                            editProfileNotifier.privacyChanged(newValue);
-                          },
-                        ),
-                        SizedBox(height: 24),
+                        // _ProfilePrivacySwitch(
+                        //   initialValue: editProfileState.isPrivate,
+                        //   onChanged: (newValue) {
+                        //     editProfileNotifier.privacyChanged(newValue);
+                        //   },
+                        // ),
+                        // SizedBox(height: 24),
                       ],
                     ),
                   ),
@@ -382,45 +337,45 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 }
 
-class _ProfilePrivacySwitch extends StatefulWidget {
-  final bool initialValue;
-  final void Function(bool newValue) onChanged;
-
-  const _ProfilePrivacySwitch({
-    Key? key,
-    required this.initialValue,
-    required this.onChanged,
-  }) : super(key: key);
-
-  @override
-  State<_ProfilePrivacySwitch> createState() => _ProfilePrivacySwitchState();
-}
-
-class _ProfilePrivacySwitchState extends State<_ProfilePrivacySwitch> {
-  late bool _isPrivate;
-
-  @override
-  void initState() {
-    _isPrivate = widget.initialValue;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text('Приватный профиль'),
-        SizedBox(width: 4),
-        Switch(
-            value: _isPrivate,
-            onChanged: (newValue) {
-              widget.onChanged(newValue);
-              setState(() {
-                _isPrivate = newValue;
-              });
-            }),
-      ],
-    );
-    ;
-  }
-}
+// class _ProfilePrivacySwitch extends StatefulWidget {
+//   final bool initialValue;
+//   final void Function(bool newValue) onChanged;
+//
+//   const _ProfilePrivacySwitch({
+//     Key? key,
+//     required this.initialValue,
+//     required this.onChanged,
+//   }) : super(key: key);
+//
+//   @override
+//   State<_ProfilePrivacySwitch> createState() => _ProfilePrivacySwitchState();
+// }
+//
+// class _ProfilePrivacySwitchState extends State<_ProfilePrivacySwitch> {
+//   late bool _isPrivate;
+//
+//   @override
+//   void initState() {
+//     _isPrivate = widget.initialValue;
+//     super.initState();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         Text('Приватный профиль'),
+//         SizedBox(width: 4),
+//         Switch(
+//             value: _isPrivate,
+//             onChanged: (newValue) {
+//               widget.onChanged(newValue);
+//               setState(() {
+//                 _isPrivate = newValue;
+//               });
+//             }),
+//       ],
+//     );
+//     ;
+//   }
+// }

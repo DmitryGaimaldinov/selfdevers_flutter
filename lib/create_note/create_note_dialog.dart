@@ -20,8 +20,20 @@ import 'package:selfdevers/widgets/neon_outlined_button.dart';
 import 'package:selfdevers/widgets/show_adaptive_dialog.dart';
 import 'package:path/path.dart' as path;
 
-Future<void> showCreateNoteDialog(BuildContext context, { NoteDto? quotedNoteDto }) =>
-    showAdaptiveDialog(context: context, screen: CreateNoteScreen(quotedNoteDto: quotedNoteDto));
+// Returns true if note is created. False if note
+Future<bool> showCreateNoteDialog(BuildContext context,
+        {NoteDto? quotedNoteDto, NoteDto? parentNoteDto}) async {
+  final isNoteCreated = await showAdaptiveDialog<bool?>(
+        context: context,
+        screen: CreateNoteScreen(
+            quotedNoteDto: quotedNoteDto, parentNoteDto: parentNoteDto));
+
+  if (isNoteCreated == true) {
+    return true;
+  }
+
+  return false;
+}
 
 final _canSendNoteProvider = StateProvider.autoDispose<bool>((ref) {
   return false;
@@ -41,10 +53,12 @@ final _canAddToDraftProvider = StateProvider.autoDispose<bool>((ref) {
 
 class CreateNoteScreen extends ConsumerStatefulWidget {
   final NoteDto? quotedNoteDto;
+  final NoteDto? parentNoteDto;
 
   const CreateNoteScreen({
     Key? key,
     this.quotedNoteDto,
+    this.parentNoteDto,
   }) : super(key: key);
 
   @override
@@ -58,7 +72,8 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
   @override
   void initState() {
     super.initState();
-    print('create note screen init state. widget.quotedNoteDto ${widget.quotedNoteDto}');
+    print(
+        'create note screen init state. widget.quotedNoteDto ${widget.quotedNoteDto}');
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _addEmptyNoteAt(0);
     });
@@ -67,15 +82,24 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
   Future<void> _send() async {
     try {
       await ref.read(createNoteStateProvider.notifier).send(
-          sendNoteDtos: _draftNoteViewDtos
-              .map((draftNoteViewDto) => SendNoteDto(
-                  text: draftNoteViewDto.richTextController.text,
-                  imageXFiles: draftNoteViewDto.imageXFiles,
-                  quotedNoteId: draftNoteViewDto.quotedNoteDto?.id))
-              .toList());
+          sendNoteDtos: List.generate(_draftNoteViewDtos.length, (index) {
+            final draftNoteViewDto = _draftNoteViewDtos[index];
+            int? parentNoteId;
+            if (index == 0 && widget.parentNoteDto != null) {
+              parentNoteId = widget.parentNoteDto!.id;
+            }
+
+            return SendNoteDto(
+              parentNoteId: parentNoteId,
+              text: draftNoteViewDto.richTextController.text,
+              imageXFiles: draftNoteViewDto.imageXFiles,
+              quotedNoteId: draftNoteViewDto.quotedNoteDto?.id,
+            );
+          }),
+      );
       if (mounted) {
         Fluttertoast.showToast(msg: 'Посты отправлены!');
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       }
     } catch (e) {
       rethrow;
@@ -267,50 +291,62 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
-                    children: List.generate(_draftNoteViewDtos.length, (index) {
-                      final dto = _draftNoteViewDtos[index];
-                      final canBeDeleted = (index != 0) && !isSending;
-
-                      final isLastNote = (index == _draftNoteViewDtos.length - 1);
-
-                      // final NoteDto? quotedNoteDto =
-                      //     (index == 0) ? widget.quotedNoteDto : null;
-
-                      return Opacity(
-                        opacity: (index == _selectedNoteIndex && !isSending)
-                            ? 1
-                            : 0.6,
-                        child: _DraftNoteView(
-                          key: dto.key,
-                          hintText: (index == 0)
-                              ? 'Напишите что-нибудь'
-                              : 'Напишите ещё что-нибудь',
-                          focusNode: dto.focusNode,
-                          textEditingController: dto.richTextController,
-                          showLineToNextNote: !isLastNote,
-                          deleteButton: canBeDeleted
-                              ? _DeleteNoteButton(
-                                  onPressed: () => _deleteNoteAt(index),
-                                )
-                              : null,
-                          imageProviders:
-                              dto.imageXFiles.map<ImageProvider>((xFile) {
-                            if (kIsWeb) {
-                              return NetworkImage(xFile.path);
-                            } else {
-                              return AssetImage(xFile.path);
-                            }
-                          }).toList(),
-                          onImageDeleted: (int imageIndex) {
-                            setState(() {
-                              dto.imageXFiles.removeAt(imageIndex);
-                            });
-                          },
-                          quotedNoteDto: dto.quotedNoteDto,
+                    children: [
+                      if (widget.parentNoteDto != null)
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            QuotedNoteView(note: widget.parentNoteDto!),
+                            SizedBox(height: 16),
+                            MyDivider(),
+                            SizedBox(height: 16),
+                          ],
                         ),
-                      );
-                    })
-                      ..add(MouseRegion(
+                      ...List.generate(_draftNoteViewDtos.length, (index) {
+                        final dto = _draftNoteViewDtos[index];
+                        final canBeDeleted = (index != 0) && !isSending;
+
+                        final isLastNote =
+                            (index == _draftNoteViewDtos.length - 1);
+
+                        // final NoteDto? quotedNoteDto =
+                        //     (index == 0) ? widget.quotedNoteDto : null;
+
+                        return Opacity(
+                          opacity: (index == _selectedNoteIndex && !isSending)
+                              ? 1
+                              : 0.6,
+                          child: _DraftNoteView(
+                            key: dto.key,
+                            hintText: (index == 0)
+                                ? 'Напишите что-нибудь'
+                                : 'Напишите ещё что-нибудь',
+                            focusNode: dto.focusNode,
+                            textEditingController: dto.richTextController,
+                            showLineToNextNote: !isLastNote,
+                            deleteButton: canBeDeleted
+                                ? _DeleteNoteButton(
+                                    onPressed: () => _deleteNoteAt(index),
+                                  )
+                                : null,
+                            imageProviders:
+                                dto.imageXFiles.map<ImageProvider>((xFile) {
+                              if (kIsWeb) {
+                                return NetworkImage(xFile.path);
+                              } else {
+                                return AssetImage(xFile.path);
+                              }
+                            }).toList(),
+                            onImageDeleted: (int imageIndex) {
+                              setState(() {
+                                dto.imageXFiles.removeAt(imageIndex);
+                              });
+                            },
+                            quotedNoteDto: dto.quotedNoteDto,
+                          ),
+                        );
+                      }),
+                      MouseRegion(
                         cursor: SystemMouseCursors.text,
                         child: GestureDetector(
                           onTap: () {
@@ -322,30 +358,8 @@ class _CreateNoteScreenState extends ConsumerState<CreateNoteScreen> {
                             color: Colors.transparent,
                           ),
                         ),
-                      )),
-                    // children: [
-                    // TODO: Нужно как-то узнавать содержимое каждой
-                    // заметки, чтобы потом разом всё сохранить,
-                    // а так же чтобы правильно отображать кнопки
-                    // "Опубликовать" и "Добавить в черновик".
-                    // TODO 2: Нужно упралять opacity в зависимости от
-                    // focusNode в этом виджете.
-                    // Для этого можно создать какой-нибудь класс
-                    // createNoteViewDto, где будут размещаться
-                    // TextEditingController, focusNode и значение opacity
-
-                    // _CreateNoteView(
-                    //   textEditingController: TextEditingController(),
-                    //   focusNode: _textFocusNode2,
-                    //   hintText: 'Напишите ещё одну заметку',
-                    //   showLineToNextNote: true,
-                    // ),
-                    // _CreateNoteView(
-                    //   textEditingController: ,
-                    //   focusNode: _textFocusNode3,
-                    //   hintText: 'Напишите ещё одну заметку',
-                    // ),
-                    // ],
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -493,12 +507,14 @@ class _DraftNoteViewDto {
     required this.richTextController,
     required this.focusNode,
     this.imageXFiles = const [],
-    this.matches = const[],
+    this.matches = const [],
     this.quotedNoteDto,
   });
 
   bool isNoteEmpty() {
-    if (richTextController.text.trim().isEmpty && imageXFiles.isEmpty && quotedNoteDto == null) {
+    if (richTextController.text.trim().isEmpty &&
+        imageXFiles.isEmpty &&
+        quotedNoteDto == null) {
       return true;
     }
 
@@ -624,7 +640,7 @@ class _DraftNoteView extends ConsumerWidget {
                                     return null;
                                   },
                                 ),
-                                _buildImages(),
+                                _buildImages(ref),
                                 // SizedBox(height: 16),
                                 if (quotedNoteDto != null)
                                   QuotedNoteView(note: quotedNoteDto!),
@@ -652,7 +668,9 @@ class _DraftNoteView extends ConsumerWidget {
     );
   }
 
-  Widget _buildImages() {
+  Widget _buildImages(WidgetRef ref) {
+    final createNoteState = ref.watch(createNoteStateProvider).isSending;
+
     if (imageProviders.isEmpty) {
       return const SizedBox();
     }
@@ -667,6 +685,8 @@ class _DraftNoteView extends ConsumerWidget {
     }
 
     const spaceBetween = 8.0;
+
+    // final isSending = ref.watch(isSend)
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -802,8 +822,8 @@ class _BottomEditingBar extends ConsumerWidget {
                   padding: const EdgeInsets.only(right: 8.0),
                   child: lengthCounterView!,
                 ),
-              addNoteButton,
-              SizedBox(width: 8),
+              // addNoteButton,
+              // SizedBox(width: 8),
               publishButton,
             ]),
           ),

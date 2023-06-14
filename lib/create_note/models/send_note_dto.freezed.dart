@@ -19,6 +19,7 @@ mixin _$SendNoteDto {
   String get text => throw _privateConstructorUsedError;
   List<XFile> get imageXFiles => throw _privateConstructorUsedError;
   int? get quotedNoteId => throw _privateConstructorUsedError;
+  int? get parentNoteId => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $SendNoteDtoCopyWith<SendNoteDto> get copyWith =>
@@ -31,7 +32,11 @@ abstract class $SendNoteDtoCopyWith<$Res> {
           SendNoteDto value, $Res Function(SendNoteDto) then) =
       _$SendNoteDtoCopyWithImpl<$Res, SendNoteDto>;
   @useResult
-  $Res call({String text, List<XFile> imageXFiles, int? quotedNoteId});
+  $Res call(
+      {String text,
+      List<XFile> imageXFiles,
+      int? quotedNoteId,
+      int? parentNoteId});
 }
 
 /// @nodoc
@@ -50,6 +55,7 @@ class _$SendNoteDtoCopyWithImpl<$Res, $Val extends SendNoteDto>
     Object? text = null,
     Object? imageXFiles = null,
     Object? quotedNoteId = freezed,
+    Object? parentNoteId = freezed,
   }) {
     return _then(_value.copyWith(
       text: null == text
@@ -64,6 +70,10 @@ class _$SendNoteDtoCopyWithImpl<$Res, $Val extends SendNoteDto>
           ? _value.quotedNoteId
           : quotedNoteId // ignore: cast_nullable_to_non_nullable
               as int?,
+      parentNoteId: freezed == parentNoteId
+          ? _value.parentNoteId
+          : parentNoteId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -76,7 +86,11 @@ abstract class _$$_SendNoteDtoCopyWith<$Res>
       __$$_SendNoteDtoCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String text, List<XFile> imageXFiles, int? quotedNoteId});
+  $Res call(
+      {String text,
+      List<XFile> imageXFiles,
+      int? quotedNoteId,
+      int? parentNoteId});
 }
 
 /// @nodoc
@@ -93,6 +107,7 @@ class __$$_SendNoteDtoCopyWithImpl<$Res>
     Object? text = null,
     Object? imageXFiles = null,
     Object? quotedNoteId = freezed,
+    Object? parentNoteId = freezed,
   }) {
     return _then(_$_SendNoteDto(
       text: null == text
@@ -107,6 +122,10 @@ class __$$_SendNoteDtoCopyWithImpl<$Res>
           ? _value.quotedNoteId
           : quotedNoteId // ignore: cast_nullable_to_non_nullable
               as int?,
+      parentNoteId: freezed == parentNoteId
+          ? _value.parentNoteId
+          : parentNoteId // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -117,7 +136,8 @@ class _$_SendNoteDto implements _SendNoteDto {
   _$_SendNoteDto(
       {required this.text,
       required final List<XFile> imageXFiles,
-      required this.quotedNoteId})
+      required this.quotedNoteId,
+      required this.parentNoteId})
       : _imageXFiles = imageXFiles;
 
   @override
@@ -132,10 +152,12 @@ class _$_SendNoteDto implements _SendNoteDto {
 
   @override
   final int? quotedNoteId;
+  @override
+  final int? parentNoteId;
 
   @override
   String toString() {
-    return 'SendNoteDto(text: $text, imageXFiles: $imageXFiles, quotedNoteId: $quotedNoteId)';
+    return 'SendNoteDto(text: $text, imageXFiles: $imageXFiles, quotedNoteId: $quotedNoteId, parentNoteId: $parentNoteId)';
   }
 
   @override
@@ -147,12 +169,18 @@ class _$_SendNoteDto implements _SendNoteDto {
             const DeepCollectionEquality()
                 .equals(other._imageXFiles, _imageXFiles) &&
             (identical(other.quotedNoteId, quotedNoteId) ||
-                other.quotedNoteId == quotedNoteId));
+                other.quotedNoteId == quotedNoteId) &&
+            (identical(other.parentNoteId, parentNoteId) ||
+                other.parentNoteId == parentNoteId));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, text,
-      const DeepCollectionEquality().hash(_imageXFiles), quotedNoteId);
+  int get hashCode => Object.hash(
+      runtimeType,
+      text,
+      const DeepCollectionEquality().hash(_imageXFiles),
+      quotedNoteId,
+      parentNoteId);
 
   @JsonKey(ignore: true)
   @override
@@ -165,7 +193,8 @@ abstract class _SendNoteDto implements SendNoteDto {
   factory _SendNoteDto(
       {required final String text,
       required final List<XFile> imageXFiles,
-      required final int? quotedNoteId}) = _$_SendNoteDto;
+      required final int? quotedNoteId,
+      required final int? parentNoteId}) = _$_SendNoteDto;
 
   @override
   String get text;
@@ -173,6 +202,8 @@ abstract class _SendNoteDto implements SendNoteDto {
   List<XFile> get imageXFiles;
   @override
   int? get quotedNoteId;
+  @override
+  int? get parentNoteId;
   @override
   @JsonKey(ignore: true)
   _$$_SendNoteDtoCopyWith<_$_SendNoteDto> get copyWith =>

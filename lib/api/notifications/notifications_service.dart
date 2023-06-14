@@ -26,6 +26,10 @@ class NotificationsService {
     return GetNotificationsResultDto.fromJson(response.data);
   }
 
+  Future<void> markAsViewed() async {
+    await _ref.read(apiProvider).post('notifications/mark-as-viewed');
+  }
+
   // Future<int> getUnreadCount() {
   //   final completer = Completer<int>();
   //   _ref.watch(wsApiProvider).socket.emitWithAck(

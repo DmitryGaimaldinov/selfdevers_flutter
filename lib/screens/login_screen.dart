@@ -159,7 +159,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               builder: (_, ref, __) {
                                 return PasswordTextField(
                                   controller: _passwordController,
-                                  errorText: ref.watch(passwordErrorTextProvider),
+                                  errorText:
+                                      ref.watch(passwordErrorTextProvider),
                                 );
                               },
                             ),
@@ -176,7 +177,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         noActionText: 'Ещё не зарегестрированы?',
                         actionText: 'Создать аккаунт',
                         onActionTextTap: () {
-                          ref.read(loginStateProvider.notifier).state = LoginState.register;
+                          ref.read(loginStateProvider.notifier).state =
+                              LoginState.register;
                         },
                       ),
                       SizedBox(height: 16),

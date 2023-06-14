@@ -10,5 +10,6 @@ class GetFeedPeopleResultDto with _$GetFeedPeopleResultDto {
     required List<NoteDto> notes,
   }) = _GetFeedPeopleResultDto;
 
-  factory GetFeedPeopleResultDto.fromJson(Map<String, dynamic> json) => _$GetFeedPeopleResultDtoFromJson(json);
+  factory GetFeedPeopleResultDto.fromJson(Map<String, dynamic> json) =>
+      _$GetFeedPeopleResultDtoFromJson(json);
 }

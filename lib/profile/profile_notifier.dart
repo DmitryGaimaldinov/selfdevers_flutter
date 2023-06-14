@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:selfdevers/api/api.dart';
 import 'package:selfdevers/api/api_services.dart';
 import 'package:selfdevers/api/followings/dto/follow_state_dto.dart';
+import 'package:selfdevers/api/notes/dto/note_dto.dart';
 import 'package:selfdevers/api/status_codes.dart';
 import 'package:selfdevers/api/users/dto/user_dto.dart';
 import 'package:selfdevers/api/users/users_service.dart';
@@ -23,19 +24,19 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   final Ref _ref;
   final String userTag;
 
-  ProfileNotifier(this._ref, this.userTag) : super(ProfileStateLoading()) {
+  ProfileNotifier(this._ref, this.userTag) : super(ProfileState.loading()) {
     loadUser();
   }
 
   Future<void> loadUser() async {
     try {
-      final userDto= await _ref.read(usersServiceProvider).getUserByTag(userTag);
+      final userDto = await _ref.read(usersServiceProvider).getUserByTag(userTag);
       setUserData(userDto);
     } on DioError catch (e) {
       if (e.type == DioErrorType.badResponse) {
         final response = e.response!;
         if (response.statusCode == StatusCodes.notFound) {
-          state = ProfileStateNotFound();
+          state = ProfileState.notFound();
         } else {
           debugPrint(response.data);
           rethrow;
@@ -47,20 +48,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   void setUserData(UserDto userDto) {
-    state = ProfileStateLoaded(userDto);
+    state = ProfileState.loaded(userDto: userDto);
   }
 
   Future<void> follow(int userId) async {
-    if (state is ProfileStateLoaded) {
-      final user = await _ref.read(usersServiceProvider).follow(userId);
-      setUserData(user);
-    }
+    final user = await _ref.read(usersServiceProvider).follow(userId);
+    setUserData(user);
   }
 
   Future<void> unfollow(int userId) async {
-    if (state is ProfileStateLoaded) {
-      final user = await _ref.read(usersServiceProvider).unfollow(userId);
-      setUserData(user);
-    }
+    final user = await _ref.read(usersServiceProvider).unfollow(userId);
+    setUserData(user);
   }
 }

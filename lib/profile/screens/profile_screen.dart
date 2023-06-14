@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:selfdevers/api/followings/dto/follow_state_dto.dart';
 import 'package:selfdevers/api/users/dto/user_dto.dart';
 import 'package:selfdevers/auth/auth_notifier.dart';
+import 'package:selfdevers/auth/show_login_dialog.dart';
 import 'package:selfdevers/followers_list/followers_list_screen.dart';
 import 'package:selfdevers/main.dart';
+import 'package:selfdevers/profile/profile_notes_notifier.dart';
 import 'package:selfdevers/profile/profile_notifier.dart';
 import 'package:selfdevers/profile/profile_state.dart';
 import 'package:selfdevers/edit_profile/edit_profile_screen.dart';
 import 'package:selfdevers/profile/related_user_fields.dart';
 import 'package:selfdevers/profile/user_counter.dart';
+import 'package:selfdevers/widgets/create_note_fab.dart';
 import 'package:selfdevers/widgets/linked_text.dart';
 import 'package:selfdevers/widgets/show_adaptive_dialog.dart';
 import 'package:sticky_headers/sticky_headers.dart';
@@ -67,164 +71,165 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final profileState = ref.watch(profileStateProvider(widget.userTag));
 
-    if (profileState is ProfileStateLoading) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-    else if (profileState is ProfileStateNotFound) {
-      return Center(
-        child: Text('Пользователь не найден'),
-      );
-    } else if (profileState is ProfileStateLoaded) {
-      final user = profileState.userDto;
+    return profileState.when(
+      loading: () {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+      notFound: () {
+        return Center(
+          child: Text('Пользователь не найден'),
+        );
+      },
+      loaded: (UserDto userDto) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(userDto.name),
+          ),
+          floatingActionButton: ref.watch(showCreateNoteFabProvider)
+              ? const CreateNoteFAB()
+              : null,
+          body: DefaultTabController(
+            length: 2,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: CenterConstrained(
+                child: Column(
+                  children: [
+                    // Профиль
+                    LayoutBuilder(
+                        builder: (context, constraints) {
+                          final backgroundHeight = constraints.maxWidth / 3;
+                          final totalHeaderHeight = backgroundHeight + 40;
 
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(user.name),
-        ),
-        body: DefaultTabController(
-          length: 2,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: CenterConstrained(
-              child: Column(
-                children: [
-                  // Профиль
-                  LayoutBuilder(
-                      builder: (context, constraints) {
-                        final backgroundHeight = constraints.maxWidth / 3;
-                        final totalHeaderHeight = backgroundHeight + 40;
-
-                        return Container(
-                          color: Theme.of(context).colorScheme.surface,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    height: totalHeaderHeight,
-                                    color: Colors.transparent,
-                                  ),
-                                  // TODO: Сделать blurhash
-                                  BackgroundProfileImage(
-                                    height: backgroundHeight,
-                                    imageProvider: (user.background != null)
-                                        ? NetworkImage(user.background!.url)
-                                        : null,
-                                  ),
-                                  Positioned(
-                                    left: 16,
-                                    bottom: 0,
+                          return Container(
+                            color: Theme.of(context).colorScheme.surface,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Stack(
+                                  children: [
+                                    Container(
+                                      height: totalHeaderHeight,
+                                      color: Colors.transparent,
+                                    ),
                                     // TODO: Сделать blurhash
-                                    child: AvatarProfileImage(
-                                      imageProvider: (user.avatar != null)
-                                          ? NetworkImage(user.avatar!.url)
+                                    BackgroundProfileImage(
+                                      height: backgroundHeight,
+                                      imageProvider: (userDto.background != null)
+                                          ? NetworkImage(userDto.background!.url)
                                           : null,
                                     ),
-                                  ),
-                                  Positioned(
+                                    Positioned(
+                                      left: 16,
+                                      bottom: 0,
+                                      // TODO: Сделать blurhash
+                                      child: AvatarProfileImage(
+                                        imageProvider: (userDto.avatar != null)
+                                            ? NetworkImage(userDto.avatar!.url)
+                                            : null,
+                                      ),
+                                    ),
+                                    Positioned(
                                       right: 16,
                                       bottom: 0,
                                       child: ProfileActionButton(
-                                        userDto: profileState.userDto,
+                                        userDto: userDto,
                                       ),
                                     ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Container(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text.rich(
-                                        TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: user.name,
-                                              style: Theme.of(context).textTheme.titleLarge,
-                                            ),
-                                            if (user.isPrivate)
-                                              WidgetSpan(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(left: 4.0),
-                                                  child: Icon(Icons.lock),
-                                                ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Container(
+                                    color: Theme.of(context).colorScheme.surface,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text.rich(
+                                          TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: userDto.name,
+                                                style: Theme.of(context).textTheme.titleLarge,
                                               ),
+                                              if (userDto.isPrivate)
+                                                WidgetSpan(
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(left: 4.0),
+                                                    child: Icon(Icons.lock),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          '@${userDto.userTag}',
+                                          style: TextStyles.light1,
+                                        ),
+                                        userDto.description.isEmpty
+                                            ? SizedBox()
+                                            : Padding(
+                                            padding: const EdgeInsets.only(top: 16),
+                                            child: LinkedText(userDto.description)
+                                        ),
+                                        SizedBox(height: 16),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.calendar_today, size: 18),
+                                            SizedBox(width: 4),
+                                            Text(
+                                                '${DateFormat.yMMMMd().format(userDto.registerDate)}',
+                                                style: TextStyles.light2
+                                            ),
                                           ],
                                         ),
-                                      ),
-                                      Text(
-                                        '@${user.userTag}',
-                                        style: TextStyles.light1,
-                                      ),
-                                      user.description.isEmpty
-                                          ? SizedBox()
-                                          : Padding(
-                                              padding: const EdgeInsets.only(top: 16),
-                                              child: LinkedText(user.description)
-                                            ),
-                                      SizedBox(height: 16),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.calendar_today, size: 18),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            '${DateFormat.yMMMMd().format(user.registerDate)}',
-                                            style: TextStyles.light2
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 16),
-                                      Wrap(
-                                        crossAxisAlignment: WrapCrossAlignment.center,
-                                        children: [
-                                          Builder(builder: (_) {
-                                            final followingsCount = user.counters.followingsCount;
-                                            return _FollowCountText(
-                                              count: followingsCount,
-                                              label: 'читаемых',
-                                              // onTap: (relatedFields.hasAccessState == HasAccessToUserState.hasAccess)
-                                              //     ? () {
-                                              //         Navigator.of(context).push(MaterialPageRoute(
-                                              //           builder: (_) => FollowedListScreen(userId: user.id),
-                                              //         ));
-                                              //       }
-                                              //     : null,
-                                            );
-                                          }),
-                                          SizedBox(width: 16),
-                                          Builder(builder: (_) {
-                                            final followersCount = user.counters.followersCount;
-                                            return _FollowCountText(
-                                              count: followersCount,
-                                              label: 'читателей',
-                                              // onTap: (relatedFields.hasAccessState == HasAccessToUserState.hasAccess)
-                                              //     ? () {
-                                              //         Navigator.of(context).push(MaterialPageRoute(
-                                              //           builder: (_) => FollowersListScreen(userId: user.id),
-                                              //         ));
-                                              //       }
-                                              //     : null,
-                                            );
-                                          }),
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                  ),
-                  // Посты
-                  StickyHeader(
+                                        SizedBox(height: 16),
+                                        Wrap(
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: [
+                                            Builder(builder: (_) {
+                                              final followingsCount = userDto.counters.followingsCount;
+                                              return _FollowCountText(
+                                                onTap: () {
+                                                  showAdaptiveDialog(
+                                                    context: context,
+                                                    screen: FollowedListScreen(userId: userDto.id),
+                                                  );
+                                                },
+                                                count: followingsCount,
+                                                label: 'читаемых',
+                                              );
+                                            }),
+                                            SizedBox(width: 16),
+                                            Builder(builder: (_) {
+                                              final followersCount = userDto.counters.followersCount;
+                                              return _FollowCountText(
+                                                onTap: () {
+                                                  showAdaptiveDialog(
+                                                    context: context,
+                                                    screen: FollowersScreen(userId: userDto.id),
+                                                  );
+                                                },
+                                                count: followersCount,
+                                                label: 'читателей',
+                                              );
+                                            }),
+                                          ],
+                                        ),
+                                      ],
+                                    )
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                    ),
+                    // Посты
+                    StickyHeader(
                       header: ClipRRect(
                         borderRadius: BorderRadius.vertical(
                           bottom: Radius.circular(16.0),
@@ -235,66 +240,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             bottom: Radius.circular(16.0),
                           ),
                           child: TabBar(
-                            tabs: [
-                              Tab(text: 'Посты'),
-                              Tab(text: 'Ответы'),
-                            ]
+                              tabs: [
+                                Tab(text: 'Посты'),
+                                Tab(text: 'Ответы'),
+                              ]
                           ),
                         ),
                       ),
-                      content: Builder(
-                        builder: (context) {
-                          final notes = List.generate(20, (index) {
-                            return Note(
-                              0,
-                              'Какая-то запись',
-                              User(id: 0, name: 'name', userTag: 'userTag', description: 'description', registerDate: 'registerDate', avatarUrl: null, backgroundUrl: null, isPrivate: false),
-                              false,
-                              DateTime.now(),
-                            );
-                          });
-
-                          return Text('Посты');
-
-                          // return Padding(
-                          //   padding: const EdgeInsets.only(top: 8.0),
-                          //   child: Column(
-                          //     children: notes
-                          //         .map((note) {
-                          //           return NoteTile(
-                          //             onProfileTap: () => _scrollController.animateTo(
-                          //               0,
-                          //               duration: Duration(milliseconds: 150),
-                          //               curve: Curves.easeIn,
-                          //             ),
-                          //             note: note
-                          //           );
-                          //         })
-                          //         .toList(),
-                          //   ),
-                          // );
-
-                          // return ListView.separated(
-                          //   itemCount: notes.length + 100,
-                          //   itemBuilder: (_, index) {
-                          //     return NoteTile(note: notes[0]);
-                          //   },
-                          //   separatorBuilder: (BuildContext context, int index) {
-                          //     return MyDivider();
-                          //   },
-                          // );
-                        }
+                      content: Padding(
+                        padding: const EdgeInsets.only(top: 8.0, bottom: 16),
+                        child: Consumer(
+                            builder: (context, ref, _) {
+                              final notesState = ref.watch(profileNotesProvider(widget.userTag));
+                              return notesState.when(
+                                  loading: () {
+                                    return const Center(child: CircularProgressIndicator());
+                                  },
+                                  loaded: (notes) {
+                                    return ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: notes.length,
+                                      itemBuilder: (_, index) {
+                                        return NoteTile(note: notes[index]);
+                                      },
+                                    );
+                                  }
+                              );
+                            }
+                        ),
                       ),
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    }
-
-    throw 'Нет экрана для profileState: $profileState';
+        );
+      }
+    );
   }
 }
 
@@ -315,8 +298,7 @@ class ProfileActionButton extends ConsumerWidget {
       return _FollowButton(
         label: 'Войдите, чтобы подписаться',
         onPressed: () {
-          throw 'Сделать реализацию "Войти чтобы подписаться". '
-              'Вызывать какой-то метод показа диалога для входа';
+          showLoginDialog(context);
         }
       );
     }
@@ -324,8 +306,16 @@ class ProfileActionButton extends ConsumerWidget {
     if (userDto.isMe) {
       return _FollowButton(
         label: 'Изменить профиль',
-        onPressed: () {
-          showAdaptiveDialog(context: context, screen: EditProfileScreen(user: userDto));
+        onPressed: () async {
+          final UserDto? editedUserDto = await showAdaptiveDialog<UserDto>(
+              context: context,
+              screen: EditProfileScreen(user: userDto));
+
+          print('profile screen editedUserDto: $editedUserDto');
+
+          if (editedUserDto != null) {
+            context.go('/profile/${editedUserDto.userTag}', extra: userDto);
+          }
         },
       );
     }

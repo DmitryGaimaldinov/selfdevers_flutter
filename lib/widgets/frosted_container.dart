@@ -17,8 +17,10 @@ class FrostedContainer extends StatelessWidget {
         gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomCenter,
-            colors: [theme.colorScheme.surface.withOpacity(0.8), theme.colorScheme.surface.withOpacity(0.3)]
-        ),
+            colors: [
+              theme.colorScheme.surface.withOpacity(0.8),
+              theme.colorScheme.surface.withOpacity(0.7)
+            ]),
       ),
       child: child,
     );

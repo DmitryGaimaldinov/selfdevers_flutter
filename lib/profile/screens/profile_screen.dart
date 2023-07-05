@@ -130,6 +130,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         imageProvider: (userDto.avatar != null)
                                             ? NetworkImage(userDto.avatar!.url)
                                             : null,
+                                        showPlaceholder: (userDto.avatar == null) ? true : false,
                                       ),
                                     ),
                                     Positioned(

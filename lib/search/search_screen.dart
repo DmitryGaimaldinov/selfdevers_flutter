@@ -130,7 +130,7 @@ class _NotesBody extends ConsumerWidget {
           return SingleChildScrollView(
             child: Column(
               children: [
-                _SearchNotesFilterButton(),
+                CenterConstrained(child: _SearchNotesFilterButton()),
                 ...notes.map((note) => NoteTile(
                   key: UniqueKey(),
                   note: note

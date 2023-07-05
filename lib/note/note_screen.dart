@@ -198,11 +198,6 @@ class _DetailedNoteViewState extends ConsumerState<DetailedNoteView> {
                         countLabel: '${note.likeCount}',
                         label: 'лайков',
                       ),
-                      CounterButton(
-                        onPressed: null,
-                        countLabel: '1328',
-                        label: 'просмотров',
-                      ),
                     ],
                   ),
                 ),

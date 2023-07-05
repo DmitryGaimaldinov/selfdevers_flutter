@@ -250,11 +250,6 @@ class _NoteTileState extends ConsumerState<NoteTile> {
           isLiked: note.isLikedByMe,
           noteId: note.id,
         ),
-        NoteActionButton(
-          onPressed: null,
-          iconData: Icons.remove_red_eye,
-          label: '100',
-        ),
       ],
     );
   }
